@@ -3,59 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skebob VIP - Регистрация</title>
+    <title>Skebob VIP</title>
     <style>
+        :root {
+            --bg-color: #0b0b0e;
+            --panel-bg: #141419;
+            --accent: #b0ff00;
+            --text-main: #ffffff;
+            --text-muted: #888898;
+            --border: #22222c;
+        }
+
         body {
-            background-color: #0b0b0e;
-            color: #ffffff;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
+
         .form-container {
-            background: #141419;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-            width: 320px;
-            border: 1px solid #22222c;
+            background: var(--panel-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+            width: 360px;
+            border: 1px solid var(--border);
+            position: relative;
         }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
         h2 {
             text-align: center;
-            margin-bottom: 20px;
-            color: #b0ff00;
+            margin-bottom: 25px;
+            color: var(--accent);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 22px;
         }
+
         input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin: 10px 0;
             background: #1e1e26;
             border: 1px solid #2e2e3d;
-            border-radius: 6px;
-            color: #fff;
+            border-radius: 8px;
+            color: var(--text-main);
             box-sizing: border-box;
             outline: none;
+            transition: all 0.3s ease;
         }
+
         input:focus {
-            border-color: #b0ff00;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(176, 255, 0, 0.2);
         }
+
         button {
             width: 100%;
-            padding: 12px;
-            background: #b0ff00;
+            padding: 14px;
+            background: var(--accent);
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #000;
             font-weight: bold;
+            font-size: 15px;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
         button:hover {
             background: #9be000;
+            box-shadow: 0 0 15px rgba(176, 255, 0, 0.4);
+        }
+
+        .status-message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--text-muted);
         }
     </style>
 </head>
@@ -64,11 +105,12 @@
     <div class="form-container">
         <h2>Skebob VIP</h2>
         <form id="registerForm">
-            <input type="email" id="email" placeholder="Email" required>
+            <input type="email" id="email" placeholder="Электронная почта" required>
             <input type="password" id="password" placeholder="Пароль" required>
             <input type="text" id="inviteCode" placeholder="Инвайт-код" required>
-            <button type="submit">Register</button>
+            <button type="submit">Зарегистрироваться</button>
         </form>
+        <div id="status" class="status-message"></div>
     </div>
 
     <script type="module">
@@ -90,29 +132,37 @@
         const db = getFirestore(app);
 
         const registerForm = document.getElementById('registerForm');
+        const statusDiv = document.getElementById('status');
 
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
             const code = document.getElementById('inviteCode').value.trim();
 
+            statusDiv.style.color = "var(--text-muted)";
+            statusDiv.textContent = "Проверка инвайт-кода...";
+
             try {
-                // 1. Проверяем инвайт-код в Firestore
+                // 1. Проверяем инвайт в Firestore
                 const inviteRef = doc(db, "invites", code);
                 const inviteSnap = await getDoc(inviteRef);
 
                 if (!inviteSnap.exists()) {
-                    alert("Ошибка: такого инвайт-кода не существует!");
+                    statusDiv.style.color = "#ff4d4d";
+                    statusDiv.textContent = "Ошибка: такого инвайт-кода не существует!";
                     return;
                 }
 
                 const inviteData = inviteSnap.data();
                 if (inviteData.used) {
-                    alert("Ошибка: этот инвайт-код уже был использован!");
+                    statusDiv.style.color = "#ff4d4d";
+                    statusDiv.textContent = "Ошибка: этот инвайт-код уже использован!";
                     return;
                 }
+
+                statusDiv.textContent = "Создание аккаунта...";
 
                 // 2. Создаем пользователя в Firebase Auth
                 await createUserWithEmailAndPassword(auth, email, password);
@@ -120,11 +170,22 @@
                 // 3. Помечаем инвайт как использованный
                 await updateDoc(inviteRef, { used: true });
 
-                alert("Успех! Регистрация прошла успешно.");
-                window.location.reload();
+                statusDiv.style.color = "var(--accent)";
+                statusDiv.textContent = "Успех! Добро пожаловать в VIP.";
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
 
             } catch (error) {
-                alert("Ошибка регистрации: " + error.message);
+                statusDiv.style.color = "#ff4d4d";
+                if (error.code === 'auth/email-already-in-use') {
+                    statusDiv.textContent = "Ошибка: этот email уже занят.";
+                } else if (error.code === 'auth/weak-password') {
+                    statusDiv.textContent = "Ошибка: пароль слишком слабый (мин. 6 символов).";
+                } else {
+                    statusDiv.textContent = "Ошибка: " + error.message;
+                }
             }
         });
     </script>
