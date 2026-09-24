@@ -1,121 +1,291 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skebob VIP</title>
+    <title>skebob.vip</title>
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAALElEQVQ4T2NkwAIYoZgBwxj/48EcRgaGBhDjkAGwGQOgzgBlwKgDM0A1AwBy3AUF7UvPqAAAAABJRU5ErkJggg==">
     <style>
-        :root {
-            --bg-color: #0b0b0e;
-            --panel-bg: #141419;
-            --accent: #b0ff00;
-            --text-main: #ffffff;
-            --text-muted: #888898;
-            --border: #22222c;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0b0b;
+            color: #d1d5db;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
             overflow: hidden;
         }
 
-        .form-container {
-            background: var(--panel-bg);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-            width: 360px;
-            border: 1px solid var(--border);
-            position: relative;
-        }
-
-        .form-container::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-size: 22px;
-        }
-
-        input {
+        .rgb-line {
+            height: 3px;
             width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            background: #1e1e26;
-            border: 1px solid #2e2e3d;
-            border-radius: 8px;
-            color: var(--text-main);
-            box-sizing: border-box;
-            outline: none;
-            transition: all 0.3s ease;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+            background-size: 400% 400%;
+            animation: rgbAnimation 8s ease infinite;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
-        input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(176, 255, 0, 0.2);
+        @keyframes rgbAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        button {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent);
-            border: none;
-            border-radius: 8px;
-            color: #000;
-            font-weight: bold;
-            font-size: 15px;
+        .auth-nav {
+            position: fixed;
+            top: 15px;
+            right: 25px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            font-size: 0.85rem;
+        }
+
+        .auth-nav a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.2s;
             cursor: pointer;
-            margin-top: 15px;
+        }
+
+        .auth-nav a:hover {
+            color: #ffffff;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand-title {
+            font-size: 3.5rem;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        .brand-title span {
+            color: #76b900;
+        }
+
+        .download-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn {
+            background: #141414;
+            border: 1px solid #222;
+            color: #9ca3af;
+            padding: 10px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            text-decoration: none;
             transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        button:hover {
-            background: #9be000;
-            box-shadow: 0 0 15px rgba(176, 255, 0, 0.4);
+        .download-btn:hover {
+            background: #1c1c1c;
+            color: #ffffff;
+            border-color: #333;
+            transform: translateY(-2px);
         }
 
-        .status-message {
+        .download-btn svg {
+            stroke: currentColor;
+        }
+
+        .counter-text {
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        .counter-text span {
+            color: #76b900;
+            font-weight: 600;
+        }
+
+        .modal-overlay, .dashboard-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 11, 11, 0.95);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .modal-box {
+            background: #141414;
+            border: 1px solid #222;
+            padding: 30px;
+            border-radius: 8px;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-box h2 {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .modal-box input {
+            background: #0b0b0b;
+            border: 1px solid #222;
+            padding: 10px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .modal-box input:focus {
+            border-color: #76b900;
+        }
+
+        .modal-box button {
+            background: #76b900;
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .modal-box button:hover {
+            opacity: 0.9;
+        }
+
+        .modal-box .close-link {
+            font-size: 0.8rem;
+            color: #777;
             text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .modal-box .close-link:hover {
+            color: #fff;
+        }
+
+        .dashboard-content {
+            background: #141414;
+            border: 1px solid #222;
+            padding: 40px;
+            border-radius: 8px;
+            width: 450px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .dashboard-content h2 {
+            color: #fff;
+            font-size: 1.5rem;
+        }
+
+        .dashboard-content p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-    <div class="form-container">
-        <h2>Skebob VIP</h2>
-        <form id="registerForm">
-            <input type="email" id="email" placeholder="Электронная почта" required>
-            <input type="password" id="password" placeholder="Пароль" required>
-            <input type="text" id="inviteCode" placeholder="Инвайт-код" required>
-            <button type="submit">Зарегистрироваться</button>
-        </form>
-        <div id="status" class="status-message"></div>
+    <div class="rgb-line"></div>
+
+    <div class="auth-nav" id="authNav">
+        <a onclick="openModal('registerModal')">Register</a>
+        <a onclick="openModal('loginModal')">Login</a>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <h1 class="brand-title">skebob<span>.vip</span></h1>
+
+        <div class="download-box">
+            <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="download-btn" id="downloadBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
+            </a>
+            <div class="counter-text"><span id="count">0</span></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-box">
+            <h2>Create Account</h2>
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPass" placeholder="Password">
+            <input type="text" id="regInvite" placeholder="Invite Code">
+            <button onclick="handleRegister()">Register</button>
+            <span class="close-link" onclick="closeModals()">Cancel</span>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <h2>Sign In</h2>
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPass" placeholder="Password">
+            <button onclick="handleLogin()">Login</button>
+            <span class="close-link" onclick="closeModals()">Cancel</span>
+        </div>
+    </div>
+
+    <div class="dashboard-overlay" id="dashboardOverlay">
+        <div class="dashboard-content">
+            <h2>Welcome back, <span id="userEmailDisplay" style="color: #76b900;"></span>!</h2>
+            <p>You have active cloud VIP access to skebob.vip scripts.</p>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -131,18 +301,25 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const registerForm = document.getElementById('registerForm');
-        const statusDiv = document.getElementById('status');
+        window.openModal = function(modalId) {
+            closeModals();
+            document.getElementById(modalId).style.display = 'flex';
+        }
 
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        window.closeModals = function() {
+            document.getElementById('registerModal').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'none';
+        }
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const code = document.getElementById('inviteCode').value.trim();
+        window.handleRegister = async function() {
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const code = document.getElementById('regInvite').value.trim();
 
-            statusDiv.style.color = "var(--text-muted)";
-            statusDiv.textContent = "Проверка инвайт-кода...";
+            if (!email || !pass || !code) {
+                alert('Please fill in all fields!');
+                return;
+            }
 
             try {
                 // 1. Проверяем инвайт в Firestore
@@ -150,43 +327,72 @@
                 const inviteSnap = await getDoc(inviteRef);
 
                 if (!inviteSnap.exists()) {
-                    statusDiv.style.color = "#ff4d4d";
-                    statusDiv.textContent = "Ошибка: такого инвайт-кода не существует!";
+                    alert('Error: Invite code does not exist!');
                     return;
                 }
 
                 const inviteData = inviteSnap.data();
                 if (inviteData.used) {
-                    statusDiv.style.color = "#ff4d4d";
-                    statusDiv.textContent = "Ошибка: этот инвайт-код уже использован!";
+                    alert('Error: This invite code has already been used!');
                     return;
                 }
 
-                statusDiv.textContent = "Создание аккаунта...";
-
-                // 2. Создаем пользователя в Firebase Auth
-                await createUserWithEmailAndPassword(auth, email, password);
+                // 2. Создаем аккаунт в Firebase Auth
+                await createUserWithEmailAndPassword(auth, email, pass);
 
                 // 3. Помечаем инвайт как использованный
                 await updateDoc(inviteRef, { used: true });
 
-                statusDiv.style.color = "var(--accent)";
-                statusDiv.textContent = "Успех! Добро пожаловать в VIP.";
-                
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-
+                alert('Account successfully created!');
+                closeModals();
             } catch (error) {
-                statusDiv.style.color = "#ff4d4d";
-                if (error.code === 'auth/email-already-in-use') {
-                    statusDiv.textContent = "Ошибка: этот email уже занят.";
-                } else if (error.code === 'auth/weak-password') {
-                    statusDiv.textContent = "Ошибка: пароль слишком слабый (мин. 6 символов).";
-                } else {
-                    statusDiv.textContent = "Ошибка: " + error.message;
-                }
+                alert('Error: ' + error.message);
             }
+        }
+
+        window.handleLogin = async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                closeModals();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        window.handleLogout = async function() {
+            await signOut(auth);
+            document.getElementById('dashboardOverlay').style.display = 'none';
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            const authNav = document.getElementById('authNav');
+            const dashboardOverlay = document.getElementById('dashboardOverlay');
+            
+            if (user) {
+                authNav.innerHTML = `<a onclick="document.getElementById('dashboardOverlay').style.display='flex'">Dashboard</a> <a onclick="handleLogout()">Logout</a>`;
+                document.getElementById('userEmailDisplay').textContent = user.email;
+            } else {
+                authNav.innerHTML = `<a onclick="openModal('registerModal')">Register</a> <a onclick="openModal('loginModal')">Login</a>`;
+                dashboardOverlay.style.display = 'none';
+            }
+        });
+
+        const downloadBtn = document.getElementById('downloadBtn');
+        const countSpan = document.getElementById('count');
+        const namespace = 'skebob-vip-downloads';
+        const key = 'script-lua';
+
+        fetch(`https://api.countapi.xyz/get/${namespace}/${key}`)
+            .then(res => res.json())
+            .then(data => { countSpan.textContent = data.value || 0; })
+            .catch(() => { countSpan.textContent = '148'; });
+
+        downloadBtn.addEventListener('click', () => {
+            fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+                .then(res => res.json())
+                .then(data => { countSpan.textContent = data.value; });
         });
     </script>
 </body>
