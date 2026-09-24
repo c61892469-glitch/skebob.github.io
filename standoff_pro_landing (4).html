@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>standoff.pro</title>
+    <!-- Pixel-art segmented padlock favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'><path fill='%23ffffff' d='M5 2h6v3H4v1h8v1H4v1h8v1H3V7h1V5H5V3h6v2H5V2z'/><path fill='%23ffffff' d='M3 7h10v7H3V7zm1 1v5h8V8H4z'/><path fill='%23ffffff' d='M5 9h6v1H5V9zm0 2h6v1H5v-1z'/></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: #0b0b0b;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .top-rgb-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet, red);
+            background-size: 400% 400%;
+            animation: rgbAnimation 6s linear infinite;
+            z-index: 1000;
+        }
+
+        @keyframes rgbAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Main View */
+        .view-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            height: 100vh;
+        }
+
+        .logo {
+            font-size: 3.8rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: baseline;
+            user-select: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .logo:hover {
+            opacity: 0.9;
+        }
+
+        .logo .standoff {
+            color: #ffffff;
+        }
+
+        .logo .pro {
+            color: #a3e635; /* Vivid lime accent */
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 24px;
+            margin-top: 10px;
+        }
+
+        .social-icon {
+            width: 24px;
+            height: 24px;
+            fill: #ffffff;
+            opacity: 0.7;
+            transition: 0.2s ease;
+            cursor: pointer;
+        }
+
+        .social-icon:hover {
+            opacity: 1;
+            fill: #a3e635;
+            transform: translateY(-2px);
+        }
+
+        /* Forum Dashboard View */
+        .view-forum {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #121212;
+            padding-top: 4px;
+        }
+
+        .forum-header-bar {
+            background-color: #181818;
+            border-bottom: 1px solid #222;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .forum-brand {
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: baseline;
+        }
+        .forum-brand .standoff { color: #fff; }
+        .forum-brand .pro { color: #a3e635; }
+
+        .forum-nav-bar {
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #282828;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.88rem;
+            color: #aaa;
+        }
+
+        .forum-nav-bar svg {
+            width: 16px;
+            height: 16px;
+            fill: #aaa;
+        }
+
+        .forum-nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .forum-nav-links a {
+            color: #ddd;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .forum-nav-links a:hover {
+            color: #a3e635;
+            text-decoration: underline;
+        }
+
+        .forum-content {
+            padding: 30px 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .forum-box-title {
+            background-color: #181818;
+            border: 1px solid #262626;
+            padding: 10px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #ddd;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        .forum-box-body {
+            background-color: #141414;
+            border: 1px solid #262626;
+            border-top: none;
+            padding: 20px 16px;
+            font-size: 0.9rem;
+            color: #ccc;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .forum-link {
+            color: #38bdf8;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .forum-link:hover {
+            text-decoration: underline;
+        }
+
+        .forum-footer {
+            background-color: #161616;
+            border-top: 1px solid #222;
+            padding: 14px 24px;
+            font-size: 0.85rem;
+            color: #888;
+            text-align: left;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background-color: #141414;
+            border: 1px solid #222;
+            width: 520px;
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background-color: #1a1a1a;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #ccc;
+            border-bottom: 1px solid #262626;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background-color: #1c1c1c;
+            border: 1px solid #262626;
+            border-radius: 4px;
+            padding: 18px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: #b0b0b0;
+        }
+
+        .info-card strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .form-input, .form-select {
+            background-color: #1c1c1c;
+            border: 1px solid #2c2c2c;
+            border-radius: 4px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: #444;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: #181818;
+            border: 1px solid #2c2c2c;
+            border-radius: 4px;
+            margin-top: 4px;
+            max-height: 240px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-search {
+            padding: 8px;
+            border-bottom: 1px solid #262626;
+            background: #141414;
+        }
+
+        .dropdown-search input {
+            width: 100%;
+            background: #1c1c1c;
+            border: 1px solid #2c2c2c;
+            border-radius: 3px;
+            padding: 6px 10px;
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .dropdown-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #777;
+            padding: 8px 12px 4px 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-item {
+            padding: 9px 12px;
+            font-size: 0.88rem;
+            color: #ccc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-item:hover {
+            background-color: #242424;
+            color: #fff;
+        }
+
+        .dropdown-item svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .modal-footer {
+            background-color: #141414;
+            padding: 16px 24px;
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge-stock {
+            background-color: #1c1c1c;
+            border: 1px solid #2c2c2c;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .btn-action {
+            background-color: #1c1c1c;
+            border: 1px solid #2c2c2c;
+            color: #fff;
+            padding: 9px 20px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: #262626;
+            border-color: #444;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-rgb-bar"></div>
+
+    <!-- MAIN VIEW -->
+    <div class="view-main" id="mainView">
+        <div class="logo" id="mainLogoTrigger">
+            <span class="standoff">standoff</span><span class="pro">.pro</span>
+        </div>
+
+        <div class="social-icons">
+            <!-- Instagram -->
+            <svg class="social-icon" viewBox="0 0 24 24" aria-label="Instagram"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            <!-- TikTok -->
+            <svg class="social-icon" viewBox="0 0 24 24" aria-label="TikTok"><path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.242V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002-.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.853 4.853 0 0 1-1.015-.104z"/></svg>
+            <!-- Discord -->
+            <svg class="social-icon" viewBox="0 0 24 24" aria-label="Discord"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.011c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            <!-- Telegram -->
+            <svg class="social-icon" viewBox="0 0 24 24" aria-label="Telegram"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.14-.26.26-.534.26l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.832.943z"/></svg>
+            <!-- Shopping Cart (Interactive Trigger) -->
+            <svg class="social-icon" id="openShopModal" viewBox="0 0 24 24" aria-label="Store"><path d="M7 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        </div>
+    </div>
+
+    <!-- FORUM DASHBOARD VIEW (English) -->
+    <div class="view-forum" id="forumView">
+        <div class="forum-header-bar">
+            <div class="forum-brand" id="forumBrandHome">
+                <span class="standoff">standoff</span><span class="pro">.pro</span>
+            </div>
+        </div>
+
+        <div class="forum-nav-bar">
+            <svg viewBox="0 0 24 24"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"/></svg>
+            <div class="forum-nav-links">
+                <a id="navIndex">Index</a>
+                <a id="navRegister">Register</a>
+                <a id="navLogin">Login</a>
+            </div>
+        </div>
+
+        <div class="forum-content">
+            <div style="font-size: 0.9rem; color: #aaa;">You are not logged in.</div>
+            
+            <div>
+                <div class="forum-box-title">Info</div>
+                <div class="forum-box-body">
+                    <div>You do not have permission to view these forums.</div>
+                    <a class="forum-link" id="goBackMainLink">Go back</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="forum-footer">
+            standoff.pro 2026
+        </div>
+    </div>
+
+    <!-- Shop Modal Popup -->
+    <div class="modal-overlay" id="shopModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span id="modalTitleText">Buy standoff.pro Invite</span>
+                <button class="modal-close" id="closeShopModal">&times;</button>
+            </div>
+            
+            <div class="modal-body" id="modalBodyContent">
+                <!-- Step 1 Initial Content -->
+                <div class="info-card">
+                    <strong>Need an invite code, but don't have a friend with standoff.pro?</strong>
+                    Conveniently purchase a standoff.pro invite code here on the official website. Once paid, the invite code will be immediately dispatched to your email address. Buy, register, and play standoff.pro in under 15 minutes.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="badge-stock">2 in stock</div>
+                <button class="btn-action" id="modalActionBtn">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mainView = document.getElementById('mainView');
+        const forumView = document.getElementById('forumView');
+        const mainLogoTrigger = document.getElementById('mainLogoTrigger');
+        const forumBrandHome = document.getElementById('forumBrandHome');
+        const goBackMainLink = document.getElementById('goBackMainLink');
+        const navIndex = document.getElementById('navIndex');
+        const navRegister = document.getElementById('navRegister');
+        const navLogin = document.getElementById('navLogin');
+
+        function showMain() {
+            mainView.style.display = 'flex';
+            forumView.style.display = 'none';
+        }
+
+        function showForum() {
+            mainView.style.display = 'none';
+            forumView.style.display = 'flex';
+        }
+
+        mainLogoTrigger.addEventListener('click', showForum);
+        forumBrandHome.addEventListener('click', showMain);
+        goBackMainLink.addEventListener('click', showMain);
+        navIndex.addEventListener('click', showMain);
+        navRegister.addEventListener('click', () => alert('Registration is currently closed. Please use an invite code.'));
+        navLogin.addEventListener('click', () => alert('Please log in with your forum credentials.'));
+
+        // Modal Logic
+        const openBtn = document.getElementById('openShopModal');
+        const modal = document.getElementById('shopModal');
+        const closeBtn = document.getElementById('closeShopModal');
+        const modalBody = document.getElementById('modalBodyContent');
+        const actionBtn = document.getElementById('modalActionBtn');
+        const modalTitleText = document.getElementById('modalTitleText');
+
+        let currentStep = 1;
+
+        openBtn.addEventListener('click', () => {
+            currentStep = 1;
+            renderStep1();
+            modal.classList.add('active');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        function renderStep1() {
+            modalTitleText.textContent = 'Buy standoff.pro Invite';
+            modalBody.innerHTML = `
+                <div class="info-card">
+                    <strong>Need an invite code, but don't have a friend with standoff.pro?</strong>
+                    Conveniently purchase a standoff.pro invite code here on the official website. Once paid, the invite code will be immediately dispatched to your email address. Buy, register, and play standoff.pro in under 15 minutes.
+                </div>
+            `;
+            actionBtn.textContent = 'Continue';
+        }
+
+        function renderStep2() {
+            modalTitleText.textContent = 'Buy standoff.pro Invite';
+            modalBody.innerHTML = `
+                <div class="info-card" style="padding: 14px 18px; margin-bottom: 5px;">
+                    After successful payment, the invite code will be automatically sent to your email address.
+                </div>
+                <div class="form-group">
+                    <div class="form-row">
+                        <span class="form-label">Email</span>
+                        <input type="email" class="form-input" id="userEmailInput" placeholder="name@example.com">
+                    </div>
+                    <div class="form-row">
+                        <span class="form-label">Method</span>
+                        <div class="select-wrapper">
+                            <div class="form-select" id="selectTrigger" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                                <span id="selectedMethodText">Select payment method</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                            <div class="dropdown-menu" id="paymentDropdown">
+                                <div class="dropdown-search">
+                                    <input type="text" id="methodSearch" placeholder="Search...">
+                                </div>
+                                <div class="dropdown-category">Fiat currencies</div>
+                                <div class="dropdown-item" data-value="PayPal">
+                                    <svg viewBox="0 0 24 24" fill="#0070ba"><path d="M20.067 8.543c-.42 2.115-1.923 3.55-4.226 3.55H13.62l-.717 4.542h-2.58l1.32-8.368h3.33c1.782 0 3.033.84 3.414 2.826z"/></svg>
+                                    PayPal
+                                </div>
+                                <div class="dropdown-category">Cryptocurrencies</div>
+                                <div class="dropdown-item" data-value="Bitcoin">
+                                    <svg viewBox="0 0 24 24" fill="#f7931a"><path d="M12 24c6.627 0 12-5.373 12-12s-5.373-12-12-12S0 5.373 0 12s5.373 12 12 12zm2.55-14.28c.28-.18.46-.48.52-.84.1-.6-.24-.92-.88-1.04l.32-1.28-1.1-.28-.32 1.28c-.28-.06-.56-.12-.84-.18l.32-1.28-1.1-.28-.32 1.28c-.18-.04-.36-.08-.54-.12l-.78-.2-.54 2.16s.42.1.4.1c.22.06.26.2.24.32l-.6 2.4c-.04.1-.14.24-.36.18 0 0-.4-.1-.4-.1l-.76 1.76 1.04.26c.2.06.4.12.6.18l-.32 1.3 1.1.28.32-1.28c.3.08.6.16.88.22l-.32 1.28 1.1.28.32-1.3c1.32.26 2.3.14 2.72-1.04.34-.96-.02-1.52-.7-1.88.5-.12.88-.44.98-1.12zm-1.6 3.36c-.22.9-1.74.42-2.22.3l.4-1.6c.48.12 2.06.36 1.82 1.3zm.24-3.38c-.2.78-1.48.38-1.9.28l.36-1.44c.42.1 1.76.32 1.54 1.16z"/></svg>
+                                    Bitcoin
+                                </div>
+                                <div class="dropdown-item" data-value="Litecoin">
+                                    <svg viewBox="0 0 24 24" fill="#345d9d"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm2.25 15.75l-1.8 3h-2.7l1.5-7.5H9v-1.5h2.25l.9-4.5h2.25l-.9 4.5H16.5v1.5h-2.25l-1.5 7.5h1.5z"/></svg>
+                                    Litecoin
+                                </div>
+                                <div class="dropdown-item" data-value="Ethereum">
+                                    <svg viewBox="0 0 24 24" fill="#627eea"><path d="M12 0L3.6 13.56L12 18.72l8.4-5.16L12 0zm0 21.12l-8.4-4.92L12 24l8.4-7.8-8.4 4.92z"/></svg>
+                                    Ethereum
+                                </div>
+                                <div class="dropdown-item" data-value="Monero">
+                                    <svg viewBox="0 0 24 24" fill="#ff6600"><path d="M0 12c0 6.627 5.373 12 12 12s12-5.373 12-12S18.627 0 12 0 0 5.373 0 12zm3.6 0a8.4 8.4 0 1 1 16.8 0 8.4 8.4 0 0 1-16.8 0z"/></svg>
+                                    Monero
+                                </div>
+                                <div class="dropdown-item" data-value="Solana">
+                                    <svg viewBox="0 0 24 24" fill="#14f195"><path d="M3.75 5.25h16.5a1.5 1.5 0 0 1 0 3H3.75a1.5 1.5 0 0 1 0-3zm0 6h16.5a1.5 1.5 0 0 1 0 3H3.75a1.5 1.5 0 0 1 0-3zm0 6h16.5a1.5 1.5 0 0 1 0 3H3.75a1.5 1.5 0 0 1 0-3z"/></svg>
+                                    Solana
+                                </div>
+                                <div class="dropdown-item" data-value="Ripple">
+                                    <svg viewBox="0 0 24 24" fill="#23292f"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm3.36 17.28l-3.36-3.36-3.36 3.36-1.44-1.44 3.36-3.36-3.36-3.36 1.44-1.44 3.36 3.36 3.36-3.36 1.44 1.44-3.36 3.36 3.36 3.36-1.44 1.44z"/></svg>
+                                    Ripple
+                                </div>
+                                <div class="dropdown-item" data-value="Bitcoin Cash">
+                                    <svg viewBox="0 0 24 24" fill="#8dc351"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm1.8 17.1h-3.6v-1.8H9V8.7h1.2V6.9h3.6v1.8h1.2v6.6h-1.2v1.8zm-2.4-3.6h2.4V10.5h-2.4v3z"/></svg>
+                                    Bitcoin Cash
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <span class="form-label">Total amount</span>
+                        <span style="font-weight: 600; color: #fff; font-size: 0.95rem;">249,99 € <span style="font-size: 0.8rem; color: #888; font-weight: normal;">(incl. VAT)</span></span>
+                    </div>
+                </div>
+            `;
+            actionBtn.textContent = 'Continue';
+
+            // Dropdown setup
+            const selectTrigger = document.getElementById('selectTrigger');
+            const paymentDropdown = document.getElementById('paymentDropdown');
+            const selectedMethodText = document.getElementById('selectedMethodText');
+            const searchInput = document.getElementById('methodSearch');
+            const items = paymentDropdown.querySelectorAll('.dropdown-item');
+
+            selectTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                paymentDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', () => {
+                paymentDropdown.classList.remove('active');
+            });
+
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    selectedMethodText.textContent = item.textContent.trim();
+                    selectedMethodText.style.color = '#fff';
+                    paymentDropdown.classList.remove('active');
+                });
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const val = e.target.value.toLowerCase();
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(val) ? 'flex' : 'none';
+                });
+            });
+        }
+
+        actionBtn.addEventListener('click', () => {
+            if (currentStep === 1) {
+                currentStep = 2;
+                renderStep2();
+            } else {
+                alert('Redirecting to secure payment checkout...');
+                modal.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
