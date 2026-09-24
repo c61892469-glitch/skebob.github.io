@@ -242,7 +242,7 @@
         <h1 class="brand-title">skebob<span>.vip</span></h1>
 
         <div class="download-box">
-            <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="download-btn" id="downloadBtn">
+            <a href="https://raw.githubusercontent.com/skebob/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="download-btn" id="downloadBtn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
@@ -257,8 +257,8 @@
     <div class="modal-overlay" id="registerModal">
         <div class="modal-box">
             <h2>Create Account</h2>
-            <input type="email" id="regEmail" placeholder="Email">
-            <input type="password" id="regPass" placeholder="Password">
+            <input type="email" id="regEmail" placeholder="Email (e.g. name@mail.com)">
+            <input type="password" id="regPass" placeholder="Password (min. 6 chars)">
             <button onclick="handleRegister()">Register</button>
             <span class="close-link" onclick="closeModals()">Cancel</span>
         </div>
@@ -286,13 +286,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // Исправлен ключ API (убрана лишняя буква 'c')
         const firebaseConfig = {
-            apiKey: "AIzaSyBwMHj9cVCPGPhV63CDj1wedCOxDbXpkE8",
+            apiKey: "AIzaSyBwMHj9cVCPGPhV63CDj1wedOXdbXpkE8",
             authDomain: "skebob-vip.firebaseapp.com",
             projectId: "skebob-vip",
             storageBucket: "skebob-vip.firebasestorage.app",
-            messagingSenderId: "76378997738",
-            appId: "1:76378997738:web:accf6d796bfbf7944ba573"
+            messagingSenderId: "763789977738",
+            appId: "1:763789977738:web:accf6d796bfbf7944ba573"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -308,15 +309,32 @@
             document.getElementById('loginModal').style.display = 'none';
         }
 
+        // Проверка почты и длины пароля перед отправкой в Firebase
+        function validateInput(email, pass) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Введите корректный email (например: user@mail.com)');
+                return false;
+            }
+            if (pass.length < 6) {
+                alert('Пароль должен быть не менее 6 символов!');
+                return false;
+            }
+            return true;
+        }
+
         window.handleRegister = async function() {
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value.trim();
+            
+            if (!validateInput(email, pass)) return;
+
             try {
                 await createUserWithEmailAndPassword(auth, email, pass);
-                alert('Account successfully created!');
+                alert('Аккаунт успешно создан!');
                 closeModals();
             } catch (error) {
-                alert('Error: ' + error.message);
+                alert('Ошибка регистрации: ' + error.message);
             }
         }
 
@@ -327,7 +345,7 @@
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeModals();
             } catch (error) {
-                alert('Error: ' + error.message);
+                alert('Ошибка входа: ' + error.message);
             }
         }
 
