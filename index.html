@@ -242,7 +242,8 @@
         <h1 class="brand-title">skebob<span>.vip</span></h1>
 
         <div class="download-box">
-            <a href="https://raw.githubusercontent.com/skebob/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="download-btn" id="downloadBtn">
+            <!-- Прямая ссылка на файл script.lua с твоего GitHub Pages -->
+            <a href="script.lua" download="skebob_trashtalk.lua" class="download-btn" id="downloadBtn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
@@ -286,7 +287,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Исправлен ключ API (убрана лишняя буква 'c')
         const firebaseConfig = {
             apiKey: "AIzaSyBwMHj9cVCPGPhV63CDj1wedOXdbXpkE8",
             authDomain: "skebob-vip.firebaseapp.com",
@@ -309,7 +309,6 @@
             document.getElementById('loginModal').style.display = 'none';
         }
 
-        // Проверка почты и длины пароля перед отправкой в Firebase
         function validateInput(email, pass) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
@@ -380,7 +379,8 @@
         downloadBtn.addEventListener('click', () => {
             fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
                 .then(res => res.json())
-                .then(data => { countSpan.textContent = data.value; });
+                .then(data => { countSpan.textContent = data.value; })
+                .catch(() => {});
         });
     </script>
 </body>
