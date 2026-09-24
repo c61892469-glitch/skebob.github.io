@@ -242,7 +242,6 @@
         <h1 class="brand-title">skebob<span>.vip</span></h1>
 
         <div class="download-box">
-            <!-- Прямая ссылка на файл script.lua с твоего GitHub Pages -->
             <a href="script.lua" download="skebob_trashtalk.lua" class="download-btn" id="downloadBtn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -255,11 +254,13 @@
         </div>
     </div>
 
+    <!-- Модальное окно регистрации с полем инвайта -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal-box">
             <h2>Create Account</h2>
             <input type="email" id="regEmail" placeholder="Email (e.g. name@mail.com)">
             <input type="password" id="regPass" placeholder="Password (min. 6 chars)">
+            <input type="text" id="regInvite" placeholder="Invite Code">
             <button onclick="handleRegister()">Register</button>
             <span class="close-link" onclick="closeModals()">Cancel</span>
         </div>
@@ -286,6 +287,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBwMHj9cVCPGPhV63CDj1wedOXdbXpkE8",
@@ -298,6 +300,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         window.openModal = function(modalId) {
             closeModals();
@@ -309,28 +312,47 @@
             document.getElementById('loginModal').style.display = 'none';
         }
 
-        function validateInput(email, pass) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('Введите корректный email (например: user@mail.com)');
-                return false;
-            }
-            if (pass.length < 6) {
-                alert('Пароль должен быть не менее 6 символов!');
-                return false;
-            }
-            return true;
-        }
-
         window.handleRegister = async function() {
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value.trim();
+            const inviteCode = document.getElementById('regInvite').value.trim();
             
-            if (!validateInput(email, pass)) return;
+            if (!email || !pass || !inviteCode) {
+                alert('Заполни все поля, включая инвайт-код!');
+                return;
+            }
+
+            if (pass.length < 6) {
+                alert('Пароль должен быть не менее 6 символов!');
+                return;
+            }
 
             try {
+                // Проверяем инвайт-код в Firestore (коллекция "invites", документ = сам код)
+                const inviteRef = doc(db, "invites", inviteCode);
+                const inviteSnap = await getDoc(inviteRef);
+
+                if (!inviteSnap.exists()) {
+                    alert('Ошибка: такого инвайт-кода не существует!');
+                    return;
+                }
+
+                const inviteData = inviteSnap.data();
+                if (inviteData.used) {
+                    alert('Ошибка: этот инвайт-код уже был использован!');
+                    return;
+                }
+
+                // Если код валиден — создаем аккаунт в Firebase Auth
                 await createUserWithEmailAndPassword(auth, email, pass);
-                alert('Аккаунт успешно создан!');
+
+                // Помечаем инвайт как использованный в базе
+                await updateDoc(inviteRef, {
+                    used: true,
+                    usedBy: email
+                });
+
+                alert('Аккаунт успешно создан по инвайту!');
                 closeModals();
             } catch (error) {
                 alert('Ошибка регистрации: ' + error.message);
