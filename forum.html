@@ -3,47 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>skebob.vip - Forums & Configs</title>
+    <title>skebob.vip - Configs & Luas</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
     <style>
-        :root { --bg-deep: #0e0e0e; --bg-box: #222222; --bg-header: #2c2c2c; --bg-nav: #2a2a2a; --bg-input: #1a1a1a; --border-dark: #111111; --border-light: #333333; --text-main: #cccccc; --text-muted: #aaaaaa; --legend-blue: #5b84a9; --accent-green: #8acc14; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
-        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; font-size: 11px; }
-        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
-        .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 40px auto; }
-        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
-        .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
-        .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
-        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; justify-content: space-between; align-items: center; }
-        .f-nav-links { display: flex; gap: 12px; }
+        :root {
+            --bg-deep: #0e0e0e;
+            --bg-box: #1e1e1e;
+            --bg-header: #282828;
+            --bg-nav: #252525;
+            --border-dark: #101010;
+            --border-light: #303030;
+            --text-main: #cccccc;
+            --text-muted: #888888;
+            --accent-green: #8acc14;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; font-size: 11px; }
+        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #101010 0%, var(--accent-green) 50%, #101010 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
+        .forum-wrapper { width: 95%; max-width: 920px; margin: 25px auto 40px auto; }
+        
+        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 10px; border-radius: 2px; }
+        .f-header { background: var(--bg-header); padding: 6px 10px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); display: flex; justify-content: space-between; align-items: center; }
+        .f-content { padding: 12px; border-top: 1px solid var(--border-light); color: #bbbbbb; }
+        
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; margin-bottom: 8px; }
+        .f-nav-links { display: flex; gap: 10px; }
         .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
         .f-nav a:hover, .f-nav a.active { color: #ffffff; text-decoration: underline; font-weight: bold; }
-        .subtabs { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .subtabs-left { display: flex; gap: 6px; }
-        .subtab-btn { background: #1a1a1a; border: 1px solid #000; color: #aaa; padding: 5px 10px; cursor: pointer; font-size: 10px; }
-        .subtab-btn.active { background: #2c2c2c; color: var(--accent-green); border-color: var(--accent-green); font-weight: bold; }
-        .cfg-grid { display: flex; flex-direction: column; gap: 8px; }
-        .cfg-item { background: #1a1a1a; border: 1px solid #000000; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; text-decoration: none; }
-        .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
-        .f-input, .f-textarea { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 5px; width: 100%; outline: none; font-size: 10px; margin-top: 4px; margin-bottom: 8px; }
-        .f-textarea { height: 60px; resize: vertical; }
-        .modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-box { background: var(--bg-box); border: 1px solid var(--border-light); width: 450px; padding: 15px; border-radius: 2px; }
+
+        .f-btn {
+            background: #2b2b2b; color: #fff; border: 1px solid #3a3a3a; padding: 3px 8px;
+            font-size: 10px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block;
+        }
+        .f-btn:hover { background: #353535; border-color: var(--accent-green); }
+
+        /* GS Table Format */
+        .cfg-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .cfg-table th { background: #181818; color: #888; font-weight: normal; padding: 6px 10px; border-bottom: 1px solid var(--border-dark); font-size: 10px; }
+        .cfg-table td { padding: 8px 10px; border-bottom: 1px solid #181818; }
+        .cfg-table tr:hover td { background: #232323; }
+
+        .empty-row { padding: 30px; text-align: center; color: #666; }
+
+        /* Upload Modal Box */
+        .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-box { background: var(--bg-box); border: 1px solid var(--border-dark); width: 380px; box-shadow: 0 0 10px #000; }
+        .modal-body { padding: 12px; border-top: 1px solid var(--border-light); }
+        .form-row { margin-bottom: 8px; }
+        .form-row label { display: block; color: #888; font-size: 10px; margin-bottom: 3px; }
+        .form-row input[type="text"], .form-row textarea { width: 100%; background: #121212; border: 1px solid #303030; color: #fff; padding: 5px; font-size: 11px; }
+        .form-row input[type="file"] { color: #888; font-size: 10px; }
     </style>
 </head>
 <body>
     <div class="top-line"></div>
     <div class="forum-wrapper">
         <div class="f-box">
-            <div class="f-content" style="padding: 10px 14px;">
-                <div style="font-size: 22px; cursor: pointer;" onclick="location.href='index.html'">
+            <div class="f-content" style="padding: 8px 12px;">
+                <div style="font-size: 20px; font-weight: bold; cursor: pointer;" onclick="location.href='index.html'">
                     <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
                 </div>
                 <div class="f-nav">
                     <div class="f-nav-links">
                         <a href="index.html">Index</a>
-                        <a href="forum.html" class="active">Forums & Configs</a>
+                        <a href="forum.html" class="active">Configs & Luas</a>
                         <a href="profile.html">User Control Panel</a>
                     </div>
                     <div><a href="rules.html" style="color: var(--accent-green);">Rules</a></div>
@@ -51,168 +75,130 @@
             </div>
         </div>
 
-        <div class="subtabs">
-            <div class="subtabs-left">
-                <button class="subtab-btn active" onclick="switchTab('neverlose')">Neverlose CFG & Lua</button>
-                <button class="subtab-btn" onclick="switchTab('gamesense')">GameSense CFG & Lua</button>
+        <div class="f-box">
+            <div class="f-header">
+                <span>Configurations & Lua Repository</span>
+                <button class="f-btn" onclick="showModal()">+ Upload New Config</button>
             </div>
-            <button class="f-btn" onclick="openUploadModal()">+ Залить конфиг / луа</button>
-        </div>
-
-        <!-- NEVERLOSE SECTION -->
-        <div id="tabNeverlose" class="f-box">
-            <div class="f-header"><span>Neverlose - Configs & Lua Scripts</span><span style="color:var(--accent-green);">Cyberpunk Edition</span></div>
-            <div class="f-content">
-                <div class="cfg-grid" id="neverloseList">
-                    <div class="cfg-item">
-                        <div>
-                            <div style="font-weight:bold; color:#fff;">Neverlose Ultimate Visual & Rage CFG</div>
-                            <div style="color:#777; font-size:9px; margin-top:2px;">Автор: skebob | Одобрено стаффом</div>
-                        </div>
-                        <a href="#" class="f-btn" onclick="alert('Скачивание конфига...');">Скачать</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- GAMESENSE SECTION -->
-        <div id="tabGamesense" class="f-box" style="display:none;">
-            <div class="f-header"><span>GameSense - Configs & Lua Scripts</span><span style="color:var(--accent-green);">V3 / V4</span></div>
-            <div class="f-content">
-                <div class="cfg-grid" id="gamesenseList">
-                    <div class="cfg-item">
-                        <div>
-                            <div style="font-weight:bold; color:#fff;">GameSense Master Resolver & Anti-Aim CFG</div>
-                            <div style="color:#777; font-size:9px; margin-top:2px;">Автор: team | Одобрено стаффом</div>
-                        </div>
-                        <a href="#" class="f-btn" onclick="alert('Скачивание конфига...');">Скачать</a>
-                    </div>
-                </div>
+            <div class="f-content" style="padding: 0;" id="table-container">
+                <!-- Dynamically populated via JavaScript -->
             </div>
         </div>
     </div>
 
-    <!-- МОДАЛКА ЗАЯВКИ -->
+    <!-- Upload Modal -->
     <div class="modal-bg" id="uploadModal">
         <div class="modal-box">
-            <div style="font-weight: bold; margin-bottom: 10px; color: #fff;">Подать заявку на публикацию CFG / Lua</div>
-            <div style="font-size: 10px; color: #888; margin-bottom: 8px;">Заявка уйдёт на проверку админам. Без описания и скриншотов конфиг отклонят!</div>
-            
-            <label style="font-size: 10px; font-weight: bold;">Читы / Софт</label>
-            <select class="f-input" id="upSoftware">
-                <option value="neverlose">Neverlose</option>
-                <option value="gamesense">GameSense</option>
-            </select>
-
-            <label style="font-size: 10px; font-weight: bold;">Название конфига / луа</label>
-            <input type="text" class="f-input" id="upTitle" placeholder="Например: Legit/Rage V2 by Name">
-
-            <label style="font-size: 10px; font-weight: bold;">Ссылка на скачивание (Mega, Google Drive, GitHub и т.д.)</label>
-            <input type="text" class="f-input" id="upLink" placeholder="https://...">
-
-            <label style="font-size: 10px; font-weight: bold;">Описание и скриншоты (обязательно)</label>
-            <textarea class="f-textarea" id="upDesc" placeholder="Опиши что внутри, скинь ссылки на скриншоты меню/визуалов..."></textarea>
-
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="f-btn" id="submitUploadBtn">Отправить на проверку</button>
-                <button class="f-btn" style="background: #333;" onclick="closeUploadModal()">Отмена</button>
+            <div class="f-header">
+                <span>Submit Configuration</span>
+                <span style="cursor:pointer;" onclick="hideModal()">[X]</span>
+            </div>
+            <div class="modal-body">
+                <form id="cfgForm" onsubmit="saveConfig(event)">
+                    <div class="form-row">
+                        <label>Config / Script Title:</label>
+                        <input type="text" id="cfgTitle" required placeholder="e.g. Gamesense HVH Main">
+                    </div>
+                    <div class="form-row">
+                        <label>Description / Notes:</label>
+                        <textarea id="cfgDesc" rows="3" required placeholder="Description of your preset..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label>Select File (.cfg / .lua):</label>
+                        <input type="file" id="cfgFile" required accept=".cfg,.lua,.txt">
+                    </div>
+                    <div style="text-align: right; margin-top: 10px;">
+                        <button type="button" class="f-btn" onclick="hideModal()">Cancel</button>
+                        <button type="submit" class="f-btn" style="border-color: var(--accent-green); color: var(--accent-green);">Upload</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, addf, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        // исправление функции добавления
-        import { setDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-        const app = initializeApp({ apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10", authDomain: "skebob-vip-4aa40.firebaseapp.com", projectId: "skebob-vip-4aa40", storageBucket: "skebob-vip-4aa40.firebasestorage.app", messagingSenderId: "853888273098", appId: "1:853888273098:web:d46ec3bbb556693edd4233" });
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        onAuthStateChanged(auth, (user) => {
-            if(!user) location.href = 'login.html';
-            currentUser = user;
-            loadApprovedConfigs();
-        });
-
-        window.switchTab = function(name) {
-            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-            if(name === 'neverlose') {
-                document.getElementById('tabNeverlose').style.display = 'block';
-                document.getElementById('tabGamesense').style.display = 'none';
-                event.target.classList.add('active');
-            } else {
-                document.getElementById('tabNeverlose').style.display = 'none';
-                document.getElementById('tabGamesense').style.display = 'block';
-                event.target.classList.add('active');
-            }
+    <script>
+        function getStorage() {
+            return JSON.parse(localStorage.getItem('gs_configs') || '[]');
         }
 
-        window.openUploadModal = () => { document.getElementById('uploadModal').style.display = 'flex'; }
-        window.closeUploadModal = () => { document.getElementById('uploadModal').style.display = 'none'; }
+        function renderTable() {
+            const items = getStorage();
+            const container = document.getElementById('table-container');
 
-        document.getElementById('submitUploadBtn').onclick = async () => {
-            const software = document.getElementById('upSoftware').value;
-            const title = document.getElementById('upTitle').value.trim();
-            const link = document.getElementById('upLink').value.trim();
-            const desc = document.getElementById('upDesc').value.trim();
-
-            if(!title || !link || !desc) {
-                alert('Заполни все поля, включая описание и скриншоты!');
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-row">
+                        No configurations available in database.<br>
+                        Click "Upload New Config" to submit your file.
+                    </div>
+                `;
                 return;
             }
 
-            try {
-                await addDoc(collection(db, "submissions"), {
-                    uid: currentUser.uid,
-                    author: currentUser.displayName || currentUser.email,
-                    software,
-                    title,
-                    link,
-                    desc,
-                    status: 'pending', // pending, approved, rejected
-                    createdAt: Date.now()
-                });
-                alert('Заявка успешно отправлена! Админы проверят её в ближайшее время.');
-                closeUploadModal();
-            } catch(e) {
-                alert('Ошибка отправки: ' + e.message);
-            }
-        };
+            let html = `
+                <table class="cfg-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Title</th>
+                            <th>Description</th>
+                            <th style="width: 20%;">File Name</th>
+                            <th style="width: 15%; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
 
-        async function loadApprovedConfigs() {
-            // Загрузка одобренных конфигов из базы
-            try {
-                const q = query(collection(db, "submissions"), where("status", "==", "approved"));
-                const querySnapshot = await getDocs(q);
-                
-                let nlHTML = '';
-                let gsHTML = '';
+            items.forEach((item) => {
+                html += `
+                    <tr>
+                        <td style="color: #fff; font-weight: bold;">${escapeStr(item.title)}</td>
+                        <td style="color: #999;">${escapeStr(item.desc)}</td>
+                        <td style="color: #666; font-size: 10px;">${escapeStr(item.fileName)}</td>
+                        <td style="text-align: right;">
+                            <a href="${item.dataUrl}" download="${item.fileName}" class="f-btn" style="color: var(--accent-green);">Download</a>
+                        </td>
+                    </tr>
+                `;
+            });
 
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const itemHTML = `
-                        <div class="cfg-item">
-                            <div>
-                                <div style="font-weight:bold; color:#fff;">${data.title}</div>
-                                <div style="color:#777; font-size:9px; margin-top:2px;">Автор: ${data.author} | ${data.desc}</div>
-                            </div>
-                            <a href="${data.link}" target="_blank" class="f-btn">Скачать</a>
-                        </div>
-                    `;
-                    if(data.software === 'neverlose') nlHTML += itemHTML;
-                    else gsHTML += itemHTML;
-                });
-
-                if(nlHTML) document.getElementById('neverloseList').innerHTML += nlHTML;
-                if(gsHTML) document.getElementById('gamesenseList').innerHTML += gsHTML;
-            } catch(e) {
-                console.log("Error loading configs", e);
-            }
+            html += `</tbody></table>`;
+            container.innerHTML = html;
         }
+
+        function showModal() { document.getElementById('uploadModal').style.display = 'flex'; }
+        function hideModal() { document.getElementById('uploadModal').style.display = 'none'; }
+
+        function saveConfig(e) {
+            e.preventDefault();
+            const title = document.getElementById('cfgTitle').value;
+            const desc = document.getElementById('cfgDesc').value;
+            const fileInput = document.getElementById('cfgFile');
+            const file = fileInput.files[0];
+
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const items = getStorage();
+                items.push({
+                    title: title,
+                    desc: desc,
+                    fileName: file.name,
+                    dataUrl: evt.target.result
+                });
+                localStorage.setItem('gs_configs', JSON.stringify(items));
+                hideModal();
+                document.getElementById('cfgForm').reset();
+                renderTable();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function escapeStr(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        renderTable();
     </script>
 </body>
 </html>
