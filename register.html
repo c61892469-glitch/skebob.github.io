@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>skebob.vip - Register</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        :root {
+            --bg-deep: #0e0e0e; --bg-box: #222222; --bg-header: #2c2c2c; --bg-nav: #2a2a2a;
+            --bg-input: #1a1a1a; --border-dark: #111111; --border-light: #333333;
+            --text-main: #cccccc; --text-muted: #aaaaaa; --legend-blue: #5b84a9; --accent-green: #8acc14; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
+        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; padding: 25px 0; font-size: 11px; }
+        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
+        .forum-wrapper { width: 95%; max-width: 960px; margin: 0 auto; }
+        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
+        .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; }
+        .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
+        .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
+        .f-nav a:hover { color: #ffffff; text-decoration: underline; }
+        .f-nav a.active { font-weight: bold; color: #ffffff; }
+        .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
+        .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
+        .f-label { font-weight: bold; display: block; margin-bottom: 4px; color: #cccccc; font-size: 10px; }
+        .f-input { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px 6px; width: 100%; max-width: 250px; outline: none; font-size: 10px; }
+        .f-select { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px; width: 100%; max-width: 400px; outline: none; font-size: 10px; }
+        .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; }
+        .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
+        .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
+        .f-error-msg { display: none; background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; border-radius: 2px; }
+        .f-success-msg { display: none; background: #132d16; border: 1px solid #22752a; color: #88ff9e; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="top-line"></div>
+    <div class="forum-wrapper">
+        <div class="f-box">
+            <div class="f-content" style="padding: 10px 14px;">
+                <div style="font-size: 22px; cursor: pointer;" onclick="location.href='index.html'">
+                    <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
+                </div>
+                <div class="f-nav">
+                    <a href="index.html">Index</a>
+                    <a href="register.html" class="active">Register</a>
+                    <a href="login.html">Login</a>
+                </div>
+                <div class="f-status">You are not logged in.</div>
+            </div>
+        </div>
+        <div class="f-box">
+            <div class="f-header">Register</div>
+            <div class="f-content">
+                <div class="f-error-msg" id="regErrorMsg"></div>
+                <div class="f-success-msg" id="regSuccessMsg"></div>
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">Your username must be alphanumeric between 3 and 25 characters long</legend>
+                    <label class="f-label">Username</label>
+                    <input type="text" class="f-input" id="regUser">
+                </fieldset>
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">Please enter and confirm your chosen password</legend>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div>
+                            <label class="f-label">Password</label>
+                            <input type="password" class="f-input" id="regPass">
+                        </div>
+                        <div>
+                            <label class="f-label">Confirm password</label>
+                            <input type="password" class="f-input" id="regPassConfirm">
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">Enter a valid email address</legend>
+                    <label class="f-label">Email</label>
+                    <input type="email" class="f-input" id="regEmail">
+                </fieldset>
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">You must be invited to join this forum</legend>
+                    <label class="f-label">Invitation code</label>
+                    <input type="text" class="f-input" id="regInvite">
+                </fieldset>
+                <fieldset class="f-fieldset" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                    <legend class="f-legend">Are you a human?</legend>
+                    <div class="g-recaptcha" data-sitekey="6LeT_80tAAAAANc6m12sLRne7UCH1YMM4BwbngYC" data-theme="dark" style="margin-top: 10px;"></div>
+                </fieldset>
+            </div>
+            <div style="padding: 8px 18px 12px 18px;">
+                <button class="f-btn" onclick="handleRegister()">Register</button>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
+            authDomain: "skebob-vip-4aa40.firebaseapp.com",
+            projectId: "skebob-vip-4aa40",
+            storageBucket: "skebob-vip-4aa40.firebasestorage.app",
+            messagingSenderId: "853888273098",
+            appId: "1:853888273098:web:d46ec3bbb556693edd4233"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        function showError(msg) {
+            const el = document.getElementById('regErrorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+        function showSuccess(msg) {
+            const el = document.getElementById('regSuccessMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        window.handleRegister = async function() {
+            document.getElementById('regErrorMsg').style.display = 'none';
+            document.getElementById('regSuccessMsg').style.display = 'none';
+            
+            const user = document.getElementById('regUser').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const passConfirm = document.getElementById('regPassConfirm').value.trim();
+            const code = document.getElementById('regInvite').value.trim();
+
+            if (typeof grecaptcha !== 'undefined') {
+                const recaptchaResponse = grecaptcha.getResponse();
+                if (recaptchaResponse.length === 0) { 
+                    showError('Please complete the reCAPTCHA verification.'); 
+                    return; 
+                }
+            }
+
+            if (!email || !pass || !code) { 
+                showError('Please fill in all required fields!'); 
+                return; 
+            }
+            if (pass !== passConfirm) { 
+                showError('Entered passwords do not match!'); 
+                return; 
+            }
+
+            try {
+                const inviteRef = doc(db, "invites", code);
+                const inviteSnap = await getDoc(inviteRef);
+                if (!inviteSnap.exists() || inviteSnap.data().used) { 
+                    showError('Invalid or already redeemed invitation code!'); 
+                    return; 
+                }
+                
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const userObj = userCredential.user;
+
+                await updateDoc(inviteRef, { used: true });
+                
+                if (user) {
+                    await updateProfile(userObj, { displayName: user });
+                    await setDoc(doc(db, "users", userObj.uid), { displayName: user }, { merge: true });
+                }
+                
+                showSuccess('Registration successful! Redirecting...');
+                setTimeout(() => { location.href = 'index.html'; }, 1500);
+            } catch (error) { 
+                showError(error.message); 
+            }
+        }
+    </script>
+</body>
+</html>
