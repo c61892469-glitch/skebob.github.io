@@ -3,133 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>skebob.vip - Forum & Tickets</title>
+    <title>skebob.vip</title>
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAALElEQVQ4T2NkwAIYoZgBwxj/48EcRgaGBhDjkAGwGQOgzgBlwKgDM0A1AwBy3AUF7UvPqAAAAABJRU5ErkJggg==">
     <style>
-        /* Цветовая палитра */
+        /* Цветовая палитра в стиле Gamesense (Skeet) */
         :root {
-            --bg-deep: #050914;
-            --bg-panel: #0d141e;
-            --border-color: #1c2636;
-            --text-main: #e0e6ed;
-            --text-muted: #7b8a9d;
-            --accent: #00c8ff;
-            --accent-hover: #0099cc;
+            --bg-deep: #0b0b0b;
+            --bg-panel: #141414;
+            --border-out: #000000;
+            --border-in: #2a2a2a;
+            --text-main: #cccccc;
+            --text-muted: #777777;
+            --accent: #8acc14; /* Skeet Green */
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
         body { background-color: var(--bg-deep); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
         
-        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #0055ff, var(--accent)); position: fixed; top: 0; left: 0; z-index: 1000; }
+        /* Полоса сверху в стиле градиента skeet */
+        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
         
-        .auth-nav { position: fixed; top: 15px; right: 25px; display: flex; gap: 20px; z-index: 100; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .auth-nav a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .auth-nav a:hover { color: var(--accent); }
+        .auth-nav { position: fixed; top: 15px; right: 25px; display: flex; gap: 20px; z-index: 100; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .auth-nav a { color: var(--text-muted); text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: color 0.1s; }
+        .auth-nav a:hover { color: var(--text-main); }
 
-        .container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .brand-title { font-size: 3.5rem; font-weight: 300; letter-spacing: -0.5px; color: #ffffff; }
-        .brand-title span { color: var(--accent); font-weight: 600; }
+        .container { display: flex; flex-direction: column; align-items: center; gap: 25px; }
+        .brand-title { font-size: 2.5rem; font-weight: normal; letter-spacing: 2px; color: #ffffff; text-shadow: 0 0 10px rgba(138, 204, 20, 0.2); }
+        .brand-title span { color: var(--accent); }
+
+        /* Стиль Gamesense: черный бордер + внутренний серый бордер */
+        .gs-box { background: var(--bg-panel); border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); }
 
         .download-box { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .download-btn { background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-main); padding: 12px 25px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; text-decoration: none; transition: all 0.2s ease; font-weight: 600; }
-        .download-btn:hover { background: #121c29; border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 200, 255, 0.1); }
-        .download-btn svg { stroke: var(--accent); }
+        .download-btn { 
+            background: linear-gradient(to bottom, #222, #111);
+            color: var(--text-main); padding: 10px 30px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; text-decoration: none; font-weight: bold; 
+            border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); transition: 0.1s;
+        }
+        .download-btn:hover { box-shadow: inset 0 0 0 1px var(--accent); color: #fff; }
+        .download-btn svg { stroke: var(--text-main); transition: 0.1s; }
+        .download-btn:hover svg { stroke: var(--accent); }
 
         /* Модальные окна */
-        .modal-overlay, .dashboard-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 9, 20, 0.95); z-index: 500; justify-content: center; align-items: center; flex-direction: column; }
-        .modal-box { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 30px; border-radius: 6px; width: 340px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .modal-box h2 { font-size: 1.2rem; color: #fff; margin-bottom: 5px; font-weight: 400; }
-        .modal-box input { background: var(--bg-deep); border: 1px solid var(--border-color); padding: 12px; border-radius: 4px; color: #fff; font-size: 0.9rem; outline: none; transition: 0.2s; }
-        .modal-box input:focus { border-color: var(--accent); }
-        .modal-box button { background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-        .modal-box button:hover { opacity: 0.9; }
-        .modal-box .close-link { font-size: 0.8rem; color: var(--text-muted); text-align: center; cursor: pointer; text-decoration: none; margin-top: 5px; }
-        .modal-box .close-link:hover { color: #fff; }
-
-        /* Профиль */
-        .dashboard-content { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 30px; border-radius: 6px; width: 450px; display: flex; flex-direction: column; gap: 20px; position: relative; }
-        .profile-header { display: flex; align-items: center; gap: 20px; }
-        .profile-avatar { width: 80px; height: 80px; border-radius: 4px; border: 1px solid var(--border-color); object-fit: cover; background: var(--bg-deep); }
-        .profile-info { display: flex; flex-direction: column; gap: 5px; }
-        .profile-info h2 { color: #fff; font-size: 1.2rem; margin: 0; font-weight: 400; }
+        .modal-overlay, .dashboard-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 11, 11, 0.85); z-index: 500; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-box { width: 320px; padding: 25px; display: flex; flex-direction: column; gap: 15px; position: relative; }
+        .modal-box h2 { font-size: 14px; color: #fff; margin-bottom: 5px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border-out); padding-bottom: 10px; box-shadow: 0 1px 0 rgba(255,255,255,0.05); }
         
-        .profile-settings { border-top: 1px solid var(--border-color); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .profile-settings input { background: var(--bg-deep); border: 1px solid var(--border-color); padding: 12px; border-radius: 4px; color: #fff; font-size: 0.9rem; outline: none; }
-        .profile-settings input:focus { border-color: var(--accent); }
-        .save-btn { background: var(--bg-deep); color: var(--text-main); border: 1px solid var(--border-color); padding: 12px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .save-btn:hover { background: #121c29; border-color: var(--accent); color: var(--accent); }
-        .logout-btn { background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .logout-btn:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
-        .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; transition: 0.2s; z-index: 10; font-weight: bold; }
+        /* Инпуты */
+        .gs-input { background: #1a1a1a; border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); padding: 10px; color: #ccc; font-size: 11px; outline: none; transition: 0.1s; font-family: Tahoma, sans-serif; }
+        .gs-input:focus { box-shadow: inset 0 0 0 1px var(--accent); color: #fff; }
+        
+        /* Кнопки */
+        .gs-btn { background: linear-gradient(to bottom, #262626, #1a1a1a); color: #ccc; border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); padding: 10px; font-weight: bold; cursor: pointer; transition: 0.1s; font-size: 11px; text-transform: uppercase; }
+        .gs-btn:hover { box-shadow: inset 0 0 0 1px var(--accent); color: #fff; }
+        
+        .modal-box .close-link { font-size: 10px; color: var(--text-muted); text-align: center; cursor: pointer; text-decoration: none; margin-top: 5px; text-transform: uppercase; }
+        .modal-box .close-link:hover { color: var(--text-main); }
+        
+        .close-btn { position: absolute; top: 20px; right: 20px; color: var(--text-muted); cursor: pointer; font-size: 14px; transition: 0.1s; font-weight: bold; }
         .close-btn:hover { color: #fff; }
 
-        /* ФОРУМ & ТИКЕТЫ */
-        .forum-wrapper { width: 95vw; max-width: 1400px; height: 90vh; background: var(--bg-deep); border: 1px solid var(--border-color); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        .forum-topbar { height: 60px; background: var(--bg-panel); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
-        .forum-logo { color: #fff; font-size: 1.2rem; font-weight: 300; letter-spacing: 1px; }
-        .forum-logo span { font-weight: 700; color: var(--accent); }
-        .forum-body { display: flex; flex-grow: 1; overflow: hidden; }
-
-        /* Левое меню */
-        .forum-sidebar { width: 260px; background: var(--bg-deep); border-right: 1px solid var(--border-color); padding: 20px 0; display: flex; flex-direction: column; overflow-y: auto; }
-        .sidebar-section { margin-bottom: 20px; }
-        .sidebar-title { color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; padding: 0 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; }
-        .cat-btn { background: transparent; border: none; color: var(--text-main); text-align: left; padding: 10px 20px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 12px; width: 100%; border-left: 3px solid transparent; }
-        .cat-btn:hover { background: rgba(255,255,255,0.03); }
-        .cat-btn.active { background: rgba(0, 200, 255, 0.05); border-left: 3px solid var(--accent); color: #fff; font-weight: 600; }
+        /* Профиль */
+        .dashboard-content { width: 400px; padding: 30px; display: flex; flex-direction: column; gap: 20px; position: relative; }
+        .profile-header { display: flex; align-items: center; gap: 15px; }
+        .profile-avatar { width: 64px; height: 64px; border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); object-fit: cover; background: #1a1a1a; }
+        .profile-info { display: flex; flex-direction: column; gap: 5px; }
+        .profile-info h2 { color: #fff; font-size: 14px; margin: 0; letter-spacing: 1px; border: none; padding: 0; box-shadow: none; }
+        .profile-info span { font-size: 11px; color: var(--accent); }
         
-        .sq { width: 8px; height: 8px; display: inline-block; flex-shrink: 0; }
-        .sq-news { background: #ff3b30; }
-        .sq-media { background: #34c759; }
-        .sq-csgo { background: #007aff; }
-        .sq-gs { background: #ffcc00; }
-        .sq-nl { background: #00c8ff; }
-        .sq-offtop { background: #af52de; }
-
-        /* Правая часть */
-        .forum-chat-area { flex-grow: 1; display: flex; flex-direction: column; background: var(--bg-panel); position: relative; overflow: hidden; }
-        .chat-header { padding: 20px 25px; border-bottom: 1px solid var(--border-color); background: var(--bg-deep); display: flex; justify-content: space-between; align-items: center; }
-        .chat-header h2 { color: #fff; font-size: 1.2rem; font-weight: 400; display: flex; align-items: center; gap: 10px; }
-        
-        /* Списки Тем (Тикетов) */
-        .topics-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .topic-item { padding: 15px 25px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
-        .topic-item:hover { background: rgba(255,255,255,0.02); }
-        .topic-title { color: #fff; font-size: 1.05rem; font-weight: 600; margin-bottom: 5px; }
-        .topic-meta { color: var(--text-muted); font-size: 0.8rem; }
-        .create-btn { background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .create-btn:hover { background: var(--accent-hover); }
-
-        /* Форма создания темы */
-        .form-container { padding: 25px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-        .form-container input[type="text"], .form-container textarea { background: var(--bg-deep); border: 1px solid var(--border-color); padding: 14px; border-radius: 4px; color: #fff; font-size: 0.95rem; width: 100%; outline: none; }
-        .form-container input:focus, .form-container textarea:focus { border-color: var(--accent); }
-        .form-container textarea { height: 150px; resize: none; }
-        .file-drop-area { border: 1px dashed var(--border-color); padding: 20px; text-align: center; border-radius: 4px; background: rgba(0,0,0,0.2); }
-        .file-drop-area span { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px; }
-        
-        /* Чат внутри темы */
-        .messages-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .post { display: flex; gap: 15px; padding: 20px 25px; border-bottom: 1px solid var(--border-color); }
-        .post img { width: 45px; height: 45px; border-radius: 4px; border: 1px solid var(--border-color); object-fit: cover; }
-        .post-content { display: flex; flex-direction: column; gap: 5px; flex-grow: 1; }
-        .post-top { display: flex; justify-content: space-between; align-items: baseline; }
-        .post-author { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
-        .post-time { color: var(--text-muted); font-size: 0.75rem; }
-        .post-text { color: var(--text-main); font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-        .post-attachment { margin-top: 10px; padding: 10px; background: var(--bg-deep); border: 1px solid var(--border-color); border-radius: 4px; display: inline-block; }
-        .post-attachment a { color: var(--accent); text-decoration: none; font-size: 0.85rem; font-weight: bold; }
-        
-        .chat-input-area { display: flex; flex-direction: column; gap: 10px; padding: 20px 25px; background: var(--bg-deep); border-top: 1px solid var(--border-color); }
-        .chat-input-row { display: flex; gap: 10px; }
-        .chat-input-row input[type="text"] { flex-grow: 1; background: var(--bg-panel); border: 1px solid var(--border-color); padding: 14px 20px; border-radius: 4px; color: #fff; outline: none; }
-        .chat-input-row input[type="text"]:focus { border-color: var(--accent); }
-        .chat-input-row button { background: var(--accent); color: #000; border: none; padding: 0 30px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: #2a3546; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3b4a5f; }
+        .profile-settings { border-top: 1px solid var(--border-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; }
     </style>
 </head>
 <body>
@@ -141,154 +83,59 @@
         <h1 class="brand-title">skebob<span>.vip</span></h1>
         <div class="download-box">
             <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="download-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Download Script
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download LUA
             </a>
         </div>
     </div>
 
-    <!-- Модалки Авторизации -->
+    <!-- Модалка Регистрации -->
     <div class="modal-overlay" id="registerModal">
-        <div class="modal-box">
-            <h2>Create Account</h2>
-            <input type="email" id="regEmail" placeholder="Email">
-            <input type="password" id="regPass" placeholder="Password">
-            <input type="text" id="regInvite" placeholder="Invite Code">
-            <button onclick="handleRegister()">Register</button>
+        <div class="modal-box gs-box">
+            <h2>Register</h2>
+            <input type="email" id="regEmail" class="gs-input" placeholder="Email">
+            <input type="password" id="regPass" class="gs-input" placeholder="Password">
+            <input type="text" id="regInvite" class="gs-input" placeholder="Invite Code">
+            <button class="gs-btn" onclick="handleRegister()">Create Account</button>
             <span class="close-link" onclick="closeModals()">Cancel</span>
         </div>
     </div>
 
+    <!-- Модалка Логина -->
     <div class="modal-overlay" id="loginModal">
-        <div class="modal-box">
-            <h2>Sign In</h2>
-            <input type="email" id="loginEmail" placeholder="Email">
-            <input type="password" id="loginPass" placeholder="Password">
-            <button onclick="handleLogin()">Login</button>
+        <div class="modal-box gs-box">
+            <h2>Login</h2>
+            <input type="email" id="loginEmail" class="gs-input" placeholder="Email">
+            <input type="password" id="loginPass" class="gs-input" placeholder="Password">
+            <button class="gs-btn" onclick="handleLogin()">Sign In</button>
             <span class="close-link" onclick="closeModals()">Cancel</span>
         </div>
     </div>
 
-    <!-- Окно Профиля (Убран VIP USER) -->
+    <!-- Окно Профиля -->
     <div class="dashboard-overlay" id="dashboardOverlay">
-        <div class="dashboard-content">
+        <div class="dashboard-content gs-box">
             <div class="close-btn" onclick="closeModals()">×</div>
             <div class="profile-header">
-                <img id="profileAvatar" src="https://via.placeholder.com/80/0d141e/00c8ff?text=US" alt="Avatar" class="profile-avatar">
+                <img id="profileAvatar" src="https://via.placeholder.com/64/1a1a1a/8acc14?text=U" alt="Avatar" class="profile-avatar">
                 <div class="profile-info">
                     <h2 id="userEmailDisplay">loading...</h2>
+                    <span>UID: Active</span>
                 </div>
             </div>
             <div class="profile-settings">
-                <input type="text" id="nicknameInput" placeholder="New Display Name">
-                <input type="text" id="avatarUrlInput" placeholder="Avatar URL (PNG/JPG)">
-                <button class="save-btn" onclick="handleUpdateProfile()">Save Changes</button>
+                <input type="text" id="nicknameInput" class="gs-input" placeholder="New Username">
+                <input type="text" id="avatarUrlInput" class="gs-input" placeholder="Avatar Image URL">
+                <button class="gs-btn" onclick="handleUpdateProfile()">Save Settings</button>
             </div>
-            <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
-        </div>
-    </div>
-
-    <!-- ФОРУМ & ТИКЕТЫ -->
-    <div class="dashboard-overlay" id="forumOverlay" style="background: rgba(0,0,0,0.85);">
-        <div class="forum-wrapper">
-            
-            <div class="forum-topbar">
-                <div class="forum-logo">SKEBOB<span>.VIP</span> FORUM</div>
-                <div class="close-btn" style="position: static;" onclick="closeModals()">×</div>
-            </div>
-
-            <div class="forum-body">
-                <!-- Боковое меню -->
-                <div class="forum-sidebar">
-                    <div class="sidebar-section">
-                        <div class="sidebar-title">﹀ Categories</div>
-                        <button class="cat-btn active" onclick="switchCategory('news', 'News', 'sq-news')" id="btn-news">
-                            <span class="sq sq-news"></span> News
-                        </button>
-                        <button class="cat-btn" onclick="switchCategory('media', 'Media', 'sq-media')" id="btn-media">
-                            <span class="sq sq-media"></span> Media
-                        </button>
-                        <button class="cat-btn" onclick="switchCategory('csgo', 'CS:GO', 'sq-csgo')" id="btn-csgo">
-                            <span class="sq sq-csgo"></span> CS:GO
-                        </button>
-                        <button class="cat-btn" onclick="switchCategory('gs', 'Gamesense Issues & CFG', 'sq-gs')" id="btn-gs">
-                            <span class="sq sq-gs"></span> Gamesense
-                        </button>
-                        <button class="cat-btn" onclick="switchCategory('nl', 'Neverlose Issues & CFG', 'sq-nl')" id="btn-nl">
-                            <span class="sq sq-nl"></span> Neverlose
-                        </button>
-                        <button class="cat-btn" onclick="switchCategory('offtop', 'Offtop', 'sq-offtop')" id="btn-offtop">
-                            <span class="sq sq-offtop"></span> Offtop
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Правая зона (динамическая) -->
-                <div class="forum-chat-area">
-                    
-                    <!-- ВИД 1: СПИСОК ТЕМ -->
-                    <div id="view-topic-list" style="display: flex; flex-direction: column; height: 100%;">
-                        <div class="chat-header">
-                            <h2 id="currentCategoryTitle"><span class="sq sq-news" id="currentSq"></span> News</h2>
-                            <button class="create-btn" onclick="showCreateTopic()">+ Create Topic</button>
-                        </div>
-                        <div class="topics-container" id="topicsContainer">
-                            <!-- Темы грузятся сюда -->
-                        </div>
-                    </div>
-
-                    <!-- ВИД 2: СОЗДАНИЕ ТЕМЫ -->
-                    <div id="view-create-topic" style="display: none; flex-direction: column; height: 100%;">
-                        <div class="chat-header">
-                            <h2>Create New Topic / Ticket</h2>
-                            <button class="save-btn" style="padding: 6px 12px;" onclick="showTopicList()">Cancel</button>
-                        </div>
-                        <div class="form-container">
-                            <input type="text" id="newTopicTitle" placeholder="Topic Title...">
-                            <textarea id="newTopicText" placeholder="Describe the issue or start a discussion..."></textarea>
-                            
-                            <div class="file-drop-area">
-                                <span>Attach a file (Screenshots, CFG, LUA). <b style="color:#ef4444;">.EXE NOT ALLOWED</b></span>
-                                <input type="file" id="newTopicFile" style="color: #fff;" accept=".png,.jpg,.jpeg,.zip,.rar,.txt,.cfg,.lua,.pdf">
-                            </div>
-
-                            <button class="create-btn" style="padding: 14px; font-size: 1rem;" onclick="handleCreateTopic()">Submit Topic</button>
-                        </div>
-                    </div>
-
-                    <!-- ВИД 3: ЧАТ ВНУТРИ ТЕМЫ -->
-                    <div id="view-single-topic" style="display: none; flex-direction: column; height: 100%;">
-                        <div class="chat-header">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <button class="save-btn" style="padding: 6px 12px;" onclick="showTopicList()">← Back</button>
-                                <h2 id="activeTopicTitle">Topic Title</h2>
-                            </div>
-                        </div>
-                        <div class="messages-container" id="messagesContainer">
-                            <!-- Сообщения темы грузятся сюда -->
-                        </div>
-                        
-                        <div class="chat-input-area">
-                            <div><input type="file" id="replyFile" style="color: #7b8a9d; font-size: 0.8rem;" accept=".png,.jpg,.jpeg,.zip,.rar,.txt,.cfg,.lua,.pdf"></div>
-                            <div class="chat-input-row">
-                                <input type="text" id="postInput" placeholder="Write a reply..." onkeypress="if(event.key === 'Enter') handleSendReply()">
-                                <button onclick="handleSendReply()">Reply</button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
+            <button class="gs-btn" style="color: #ff4444;" onclick="handleLogout()">Log Out</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        // ДОБАВЛЕНО ХРАНИЛИЩЕ ДЛЯ ФАЙЛОВ
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
@@ -302,242 +149,16 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app); // Инициализация хранилища
 
-        let unsubscribeTopics = null;
-        let unsubscribeMessages = null;
-        
-        window.currentCategory = 'news'; 
-        window.currentTopicId = null;
-
-        // --- УПРАВЛЕНИЕ ВИДАМИ (VIEW) ---
-        window.showTopicList = function() {
-            document.getElementById('view-topic-list').style.display = 'flex';
-            document.getElementById('view-create-topic').style.display = 'none';
-            document.getElementById('view-single-topic').style.display = 'none';
-            if(unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
-        }
-
-        window.showCreateTopic = function() {
-            document.getElementById('view-topic-list').style.display = 'none';
-            document.getElementById('view-create-topic').style.display = 'flex';
-            document.getElementById('view-single-topic').style.display = 'none';
-        }
-
-        window.showSingleTopic = function(title) {
-            document.getElementById('view-topic-list').style.display = 'none';
-            document.getElementById('view-create-topic').style.display = 'none';
-            document.getElementById('view-single-topic').style.display = 'flex';
-            document.getElementById('activeTopicTitle').textContent = title;
-        }
-
-        // --- ЛОГИКА КАТЕГОРИЙ И ТЕМ ---
-        window.switchCategory = function(categoryId, categoryTitle, sqClass) {
-            window.currentCategory = categoryId;
-            document.getElementById('currentCategoryTitle').innerHTML = `<span class="sq ${sqClass}"></span> ${categoryTitle}`;
-            
-            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + categoryId).classList.add('active');
-
-            showTopicList();
-            loadTopics();
-        }
-
-        function formatTime(timestamp) {
-            if (!timestamp) return 'Just now';
-            const date = timestamp.toDate();
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        }
-
-        // Загрузка файла в Firebase Storage
-        async function uploadFileHelper(fileInputId) {
-            const fileInput = document.getElementById(fileInputId);
-            if (!fileInput.files.length) return null;
-            const file = fileInput.files[0];
-            
-            // Проверка на .exe (Защита)
-            const fname = file.name.toLowerCase();
-            if (fname.endsWith('.exe') || fname.endsWith('.bat') || fname.endsWith('.cmd')) {
-                throw new Error("Executable files (.exe, .bat) are strictly forbidden!");
-            }
-
-            // Загружаем в папку forum_files
-            const storageRef = ref(storage, 'forum_files/' + Date.now() + '_' + file.name);
-            await uploadBytes(storageRef, file);
-            return await getDownloadURL(storageRef);
-        }
-
-        // 1. Загрузка списка тем для категории
-        function loadTopics() {
-            const container = document.getElementById('topicsContainer');
-            if(unsubscribeTopics) unsubscribeTopics();
-
-            // Создаем коллекцию вида forum_topics_news
-            const q = query(collection(db, "forum_topics_" + window.currentCategory), orderBy("createdAt", "desc"));
-            
-            unsubscribeTopics = onSnapshot(q, (snapshot) => {
-                container.innerHTML = '';
-                if(snapshot.empty) {
-                    container.innerHTML = '<div style="padding: 25px; color: #7b8a9d;">No topics here yet. Be the first to create one!</div>';
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const topic = doc.data();
-                    const timeStr = formatTime(topic.createdAt);
-                    
-                    const div = document.createElement('div');
-                    div.className = 'topic-item';
-                    div.onclick = () => openTopic(doc.id, topic.title); // Клик открывает тему
-                    
-                    div.innerHTML = `
-                        <div>
-                            <div class="topic-title">${topic.title}</div>
-                            <div class="topic-meta">Started by <span style="color: var(--accent); font-weight: bold;">${topic.author}</span></div>
-                        </div>
-                        <div class="topic-meta">${timeStr}</div>
-                    `;
-                    container.appendChild(div);
-                });
-            });
-        }
-
-        // 2. Создание новой темы (Тикета)
-        window.handleCreateTopic = async function() {
-            const title = document.getElementById('newTopicTitle').value.trim();
-            const text = document.getElementById('newTopicText').value.trim();
-            
-            if (!title || !text || !auth.currentUser) { alert('Fill in title and text!'); return; }
-            
-            const user = auth.currentUser;
-            const displayName = user.displayName ? user.displayName : user.email.split('@')[0];
-            const photoURL = user.photoURL ? user.photoURL : "https://via.placeholder.com/80/0d141e/00c8ff?text=US";
-
-            try {
-                let fileUrl = null;
-                try {
-                    fileUrl = await uploadFileHelper('newTopicFile');
-                } catch (e) {
-                    alert("File error (did you enable Firebase Storage rules?): " + e.message);
-                    return;
-                }
-
-                // Создаем сам топик
-                const topicRef = await addDoc(collection(db, "forum_topics_" + window.currentCategory), {
-                    title: title,
-                    author: displayName,
-                    createdAt: serverTimestamp()
-                });
-
-                // Сразу добавляем первое сообщение в подколлекцию сообщений этого топика
-                await addDoc(collection(db, "forum_topics_" + window.currentCategory + "/" + topicRef.id + "/messages"), {
-                    text: text,
-                    author: displayName,
-                    avatar: photoURL,
-                    fileUrl: fileUrl,
-                    createdAt: serverTimestamp()
-                });
-
-                document.getElementById('newTopicTitle').value = '';
-                document.getElementById('newTopicText').value = '';
-                document.getElementById('newTopicFile').value = '';
-                
-                showTopicList();
-            } catch (error) { alert('Error: ' + error.message); }
-        }
-
-        // 3. Открытие темы и загрузка сообщений
-        window.openTopic = function(topicId, title) {
-            window.currentTopicId = topicId;
-            showSingleTopic(title);
-            
-            const container = document.getElementById('messagesContainer');
-            if(unsubscribeMessages) unsubscribeMessages();
-
-            const q = query(collection(db, "forum_topics_" + window.currentCategory + "/" + topicId + "/messages"), orderBy("createdAt", "asc"));
-            
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                container.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const post = doc.data();
-                    const timeStr = formatTime(post.createdAt);
-                    
-                    let attachmentHtml = '';
-                    if (post.fileUrl) {
-                        attachmentHtml = `
-                        <div class="post-attachment">
-                            <a href="${post.fileUrl}" target="_blank">📎 Download Attached File</a>
-                        </div>`;
-                    }
-
-                    const div = document.createElement('div');
-                    div.className = 'post';
-                    div.innerHTML = `
-                        <img src="${post.avatar}" alt="ava">
-                        <div class="post-content">
-                            <div class="post-top">
-                                <span class="post-author">${post.author}</span>
-                                <span class="post-time">${timeStr}</span>
-                            </div>
-                            <span class="post-text">${post.text}</span>
-                            ${attachmentHtml}
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-                container.scrollTop = container.scrollHeight;
-            });
-        }
-
-        // 4. Отправка ответа в тему
-        window.handleSendReply = async function() {
-            const input = document.getElementById('postInput');
-            const text = input.value.trim();
-            if (!auth.currentUser || (!text && !document.getElementById('replyFile').files.length)) return;
-            
-            const user = auth.currentUser;
-            const displayName = user.displayName ? user.displayName : user.email.split('@')[0];
-            const photoURL = user.photoURL ? user.photoURL : "https://via.placeholder.com/80/0d141e/00c8ff?text=US";
-
-            try {
-                let fileUrl = null;
-                try {
-                    fileUrl = await uploadFileHelper('replyFile');
-                } catch (e) {
-                    alert("File error: " + e.message); return;
-                }
-
-                await addDoc(collection(db, "forum_topics_" + window.currentCategory + "/" + window.currentTopicId + "/messages"), {
-                    text: text,
-                    author: displayName,
-                    avatar: photoURL,
-                    fileUrl: fileUrl,
-                    createdAt: serverTimestamp()
-                });
-                
-                input.value = '';
-                document.getElementById('replyFile').value = '';
-            } catch (error) { alert('Error: ' + error.message); }
-        }
-
-
-        // --- МОДАЛКИ И АВТОРИЗАЦИЯ (БЕЗ ИЗМЕНЕНИЙ) ---
         window.openModal = function(modalId) {
             closeModals();
             document.getElementById(modalId).style.display = 'flex';
-            if(modalId === 'forumOverlay') {
-                showTopicList();
-                loadTopics();
-            }
         }
 
         window.closeModals = function() {
             document.getElementById('registerModal').style.display = 'none';
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('dashboardOverlay').style.display = 'none';
-            document.getElementById('forumOverlay').style.display = 'none';
-            if(unsubscribeTopics) { unsubscribeTopics(); unsubscribeTopics = null; }
-            if(unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
         }
 
         window.handleRegister = async function() {
@@ -583,13 +204,11 @@
         onAuthStateChanged(auth, (user) => {
             const authNav = document.getElementById('authNav');
             if (user) {
-                authNav.innerHTML = `
-                    <a onclick="openModal('forumOverlay')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Forum & Support</a> 
-                    <a onclick="openModal('dashboardOverlay')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profile</a>`;
+                authNav.innerHTML = `<a onclick="openModal('dashboardOverlay')">User Panel</a>`;
                 document.getElementById('userEmailDisplay').textContent = user.displayName ? user.displayName : user.email;
-                document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/80/0d141e/00c8ff?text=US";
+                document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/64/1a1a1a/8acc14?text=U";
             } else {
-                authNav.innerHTML = `<a onclick="openModal('registerModal')">Register</a> <a onclick="openModal('loginModal')">Log In</a>`;
+                authNav.innerHTML = `<a onclick="openModal('registerModal')">Register</a> <a onclick="openModal('loginModal')">Login</a>`;
                 closeModals();
             }
         });
