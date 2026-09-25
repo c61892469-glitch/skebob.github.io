@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>skebob.vip - Login</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        :root { --bg-deep: #0e0e0e; --bg-box: #222222; --bg-header: #2c2c2c; --bg-nav: #2a2a2a; --bg-input: #1a1a1a; --border-dark: #111111; --border-light: #333333; --text-main: #cccccc; --text-muted: #aaaaaa; --legend-blue: #5b84a9; --accent-green: #8acc14; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
+        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; font-size: 11px; }
+        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
+        .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 40px auto; }
+        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
+        .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; }
+        .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
+        .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
+        .f-nav a:hover, .f-nav a.active { color: #ffffff; text-decoration: underline; font-weight: bold; }
+        .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
+        .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
+        .f-label { font-weight: bold; display: block; margin-bottom: 4px; color: #cccccc; font-size: 10px; }
+        .f-input { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px 6px; width: 100%; max-width: 250px; outline: none; font-size: 10px; }
+        .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; }
+        .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
+        .f-error-msg { display: none; background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="top-line"></div>
+    <div class="forum-wrapper">
+        <div class="f-box">
+            <div class="f-content" style="padding: 10px 14px;">
+                <div style="font-size: 22px; cursor: pointer;" onclick="location.href='index.html'">
+                    <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
+                </div>
+                <div class="f-nav">
+                    <a href="index.html">Index</a>
+                    <a href="register.html">Register</a>
+                    <a href="login.html" class="active">Login</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="f-box">
+            <div class="f-header">Login</div>
+            <div class="f-content">
+                <div class="f-error-msg" id="loginErrorMsg"></div>
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">Account Credentials</legend>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div><label class="f-label">Email Address</label><input type="email" class="f-input" id="loginEmail"></div>
+                        <div><label class="f-label">Password</label><input type="password" class="f-input" id="loginPass"></div>
+                    </div>
+                </fieldset>
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">Security Verification</legend>
+                    <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="dark"></div>
+                </fieldset>
+                <button class="f-btn" id="loginBtn">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        
+        const app = initializeApp({ apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10", authDomain: "skebob-vip-4aa40.firebaseapp.com", projectId: "skebob-vip-4aa40", storageBucket: "skebob-vip-4aa40.firebasestorage.app", messagingSenderId: "853888273098", appId: "1:853888273098:web:d46ec3bbb556693edd4233" });
+        const auth = getAuth(app);
+
+        document.getElementById('loginBtn').onclick = async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const errEl = document.getElementById('loginErrorMsg');
+            errEl.style.display = 'none';
+
+            const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
+            if (!turnstileResponse || !turnstileResponse.value) {
+                errEl.textContent = 'Please complete the verification captcha!';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if(!email || !pass) { errEl.textContent = 'Fill in all fields!'; errEl.style.display = 'block'; return; }
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                location.href = 'index.html';
+            } catch(err) {
+                errEl.textContent = 'Invalid email or password.'; errEl.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>
