@@ -11,113 +11,128 @@
 
     <style>
         :root {
-            --bg-deep: #0b0b0b;
-            --bg-panel: #141414;
-            --border-out: #000000;
-            --border-in: #2a2a2a;
+            --bg-deep: #141414;
+            --bg-box: #222222;
+            --bg-header: #2c2c2c;
+            --bg-nav: #2a2a2a;
+            --bg-input: #1a1a1a;
+            --border-dark: #111111;
+            --border-light: #333333;
             --text-main: #cccccc;
-            --text-muted: #777777;
-            --accent: #8acc14; 
+            --text-muted: #aaaaaa;
+            --legend-blue: #5b84a9;
+            --accent-green: #8acc14; 
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
-        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; font-size: 12px; }
+        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 40px; }
         
-        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
+        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
         
-        /* Главный экран */
-        .container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 25px; height: 100vh; }
-        .brand-title { font-size: 2.5rem; font-weight: normal; letter-spacing: 2px; color: #ffffff; text-shadow: 0 0 10px rgba(138, 204, 20, 0.2); cursor: pointer; transition: 0.2s; }
-        .brand-title:hover { text-shadow: 0 0 15px rgba(138, 204, 20, 0.5); }
-        .brand-title span { color: var(--accent); }
+        /* Главный форумный контейнер */
+        .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 0 auto; }
+        
+        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
+        .f-header { background: var(--bg-header); padding: 8px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 12px; }
+        .f-content { padding: 15px 20px; border-top: 1px solid var(--border-light); }
+        
+        /* Логотип и навигация */
+        .brand-logo { font-size: 24px; cursor: pointer; display: inline-block; user-select: none; }
+        .brand-logo .white { color: #ffffff; }
+        .brand-logo .green { color: var(--accent-green); }
+        
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 7px 12px; display: flex; gap: 12px; font-size: 11px; margin-top: 12px; margin-bottom: 10px; }
+        .f-nav a { color: var(--text-main); text-decoration: none; font-weight: normal; }
+        .f-nav a:hover { color: #ffffff; text-decoration: underline; }
+        .f-nav a.active { font-weight: bold; color: #ffffff; }
+        
+        .f-status { color: #bbbbbb; font-size: 11px; margin-top: 2px; }
+        
+        /* Старенькие олдскул фреймы */
+        .f-fieldset { border: 1px solid var(--border-light); padding: 12px 15px; margin-bottom: 15px; border-radius: 2px; }
+        .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 11px; margin-left: 5px; }
+        .f-label { font-weight: bold; display: block; margin-bottom: 4px; color: #cccccc; font-size: 11px; }
+        
+        /* Олдскульные инпуты */
+        .f-input { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px 6px; width: 100%; max-width: 260px; outline: none; }
+        .f-input:focus { border: 1px solid var(--legend-blue); }
+        .f-select { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px; width: 100%; max-width: 380px; outline: none; }
+        
+        /* Олдскульные кнопочки GS */
+        .f-btn { 
+            background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); 
+            color: #cccccc; 
+            border: 1px solid #000000; 
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+            border-radius: 2px; 
+            padding: 5px 14px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 11px; 
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; border-color: #333333; }
+        .f-btn:active { background: #111111; }
 
-        .gs-box { background: var(--bg-panel); border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); }
-        .gs-input { background: #1a1a1a; border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); padding: 10px; color: #ccc; font-size: 11px; outline: none; transition: 0.1s; }
-        .gs-input:focus { box-shadow: inset 0 0 0 1px var(--accent); color: #fff; }
-        .gs-btn { background: linear-gradient(to bottom, #262626, #1a1a1a); color: #ccc; border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); padding: 10px; font-weight: bold; cursor: pointer; transition: 0.1s; font-size: 11px; text-transform: uppercase; }
-        .gs-btn:hover { box-shadow: inset 0 0 0 1px var(--accent); color: #fff; }
-
-        .download-box { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .download-btn { background: linear-gradient(to bottom, #222, #111); color: var(--text-main); padding: 10px 30px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; text-decoration: none; font-weight: bold; border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); transition: 0.1s; }
-        .download-btn:hover { box-shadow: inset 0 0 0 1px var(--accent); color: #fff; }
-        .download-btn svg { stroke: var(--text-main); transition: 0.1s; }
-        .download-btn:hover svg { stroke: var(--accent); }
-
-        /* Стили Форума (из скринов) */
-        .forum-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 2000; overflow-y: auto; padding-top: 20px; }
-        .forum-wrapper { width: 95%; max-width: 1000px; margin: 0 auto 40px auto; font-size: 12px; color: #ccc; }
+        .f-text { color: var(--text-muted); font-size: 11px; margin-top: 4px; margin-bottom: 4px; line-height: 1.4; }
         
-        .f-box { background: #222; border: 1px solid #111; margin-bottom: 15px; border-radius: 2px; }
-        .f-header { background: #2c2c2c; padding: 10px 15px; font-weight: bold; color: #ddd; border-bottom: 1px solid #111; font-size: 13px; }
-        .f-content { padding: 20px; border-top: 1px solid #333; }
-        
-        .f-nav { background: #2a2a2a; border: 1px solid #111; padding: 8px 15px; display: flex; gap: 15px; font-size: 12px; margin-top: 15px; margin-bottom: 15px; }
-        .f-nav a { color: #ccc; text-decoration: none; }
-        .f-nav a:hover { color: #fff; text-decoration: underline; }
-        
-        .f-fieldset { border: 1px solid #333; padding: 15px; margin-bottom: 20px; border-radius: 2px; }
-        .f-legend { color: #5b84a9; padding: 0 5px; font-size: 12px; margin-left: 10px; }
-        .f-label { font-weight: bold; display: block; margin-bottom: 5px; color: #ccc; }
-        .f-input { background: #1a1a1a; border: 1px solid #000; color: #ccc; padding: 5px 6px; width: 100%; max-width: 250px; font-family: Tahoma; font-size: 12px; }
-        .f-input:focus { outline: none; border: 1px solid #5b84a9; }
-        .f-text { color: #aaa; font-size: 11px; margin-top: 5px; margin-bottom: 5px; }
-        
-        .f-btn { background: #222; color: #ccc; border: 1px solid #111; border-radius: 2px; padding: 6px 15px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.1s; }
-        .f-btn:hover { background: #333; color: #fff; border-color: #555; }
+        /* Вьюхи страниц */
+        .page-view { display: none; }
+        .page-view.active { display: block; }
 
-        /* Модальные окна (Логин/Профиль) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 11, 11, 0.85); z-index: 3000; justify-content: center; align-items: center; }
-        .modal-box { width: 320px; padding: 25px; display: flex; flex-direction: column; gap: 15px; position: relative; }
-        .modal-box h2 { font-size: 14px; color: #fff; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid var(--border-out); padding-bottom: 10px; }
-        .close-link { font-size: 10px; color: var(--text-muted); text-align: center; cursor: pointer; text-decoration: none; margin-top: 5px; text-transform: uppercase; }
-        .close-link:hover { color: var(--text-main); }
-        .close-btn { position: absolute; top: 20px; right: 20px; color: var(--text-muted); cursor: pointer; font-size: 14px; font-weight: bold; }
-        .close-btn:hover { color: #fff; }
-
-        .profile-header { display: flex; align-items: center; gap: 15px; }
-        .profile-avatar { width: 64px; height: 64px; border: 1px solid var(--border-out); box-shadow: inset 0 0 0 1px var(--border-in); object-fit: cover; background: #1a1a1a; }
-        .profile-info { display: flex; flex-direction: column; gap: 5px; }
-        .profile-info h2 { color: #fff; font-size: 14px; margin: 0; border: none; padding: 0; }
-        .profile-info span { font-size: 11px; color: var(--accent); }
+        /* Профиль аватар */
+        .profile-card { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; background: #1a1a1a; padding: 10px; border: 1px solid #000000; }
+        .profile-avatar { width: 54px; height: 54px; border: 1px solid #000000; object-fit: cover; background: #000; }
     </style>
 </head>
 <body>
 
     <div class="top-line"></div>
 
-    <!-- Главный экран -->
-    <div class="container" id="mainContainer">
-        <!-- Клик по лого открывает форум -->
-        <h1 class="brand-title" onclick="openForum()">skebob<span>.vip</span></h1>
-        <div class="download-box">
-            <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="download-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Download LUA
-            </a>
+    <div class="forum-wrapper">
+        
+        <!-- Верхняя шапка форума GS -->
+        <div class="f-box">
+            <div class="f-content" style="padding: 12px 15px;">
+                <div class="brand-logo" onclick="switchTab('index')">
+                    <span class="white">skebob</span><span class="green">.vip</span>
+                </div>
+                
+                <div class="f-nav" id="navBar">
+                    <a href="#" id="navIndex" onclick="switchTab('index')" class="active">Index</a>
+                    <a href="#" id="navRegister" onclick="switchTab('register')">Register</a>
+                    <a href="#" id="navLogin" onclick="switchTab('login')">Login</a>
+                </div>
+                
+                <div class="f-status" id="statusText">You are not logged in.</div>
+            </div>
         </div>
-    </div>
 
-    <!-- ФОРУМ -->
-    <div class="forum-overlay" id="forumOverlay">
-        <div class="forum-wrapper">
-            
-            <!-- Шапка форума -->
+        <!-- СТРАНИЦА: INDEX / МЕНЮ СКАЧИВАНИЯ -->
+        <div id="viewIndex" class="page-view active">
             <div class="f-box">
-                <div class="f-content" style="padding: 15px;">
-                    <div style="font-size: 22px; cursor: pointer;" onclick="closeForum()">
-                        <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
-                    </div>
-                    <div class="f-nav" id="forumNavLinks">
-                        <!-- Заполняется через JS -->
-                    </div>
-                    <div class="f-text" id="forumStatusText" style="color: #ccc;">
-                        You are not logged in.
-                    </div>
+                <div class="f-header">Information</div>
+                <div class="f-content">
+                    <fieldset class="f-fieldset">
+                        <legend class="f-legend">skebob.vip Loader & Scripts</legend>
+                        <div class="f-text" style="margin-bottom: 12px;">
+                            Welcome to skebob.vip. You can download the official lua script below or proceed to registration to gain access to account options.
+                        </div>
+                        <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="f-btn">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8acc14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download LUA Script
+                        </a>
+                    </fieldset>
                 </div>
             </div>
+        </div>
 
-            <!-- Блок Регистрации -->
-            <div class="f-box" id="forumRegisterBox">
+        <!-- СТРАНИЦА: РЕГИСТРАЦИЯ (Скрины GS) -->
+        <div id="viewRegister" class="page-view">
+            <div class="f-box">
                 <div class="f-header">Register</div>
                 <div class="f-content">
                     
@@ -129,7 +144,7 @@
 
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Please enter and confirm your chosen password</legend>
-                        <div style="display: flex; gap: 30px;">
+                        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
                             <div>
                                 <label class="f-label">Password</label>
                                 <input type="password" class="f-input" id="regPass">
@@ -139,7 +154,7 @@
                                 <input type="password" class="f-input" id="regPassConfirm">
                             </div>
                         </div>
-                        <div class="f-text" style="margin-top: 10px;">Passwords must be at least 6 characters long. Passwords are case sensitive.</div>
+                        <div class="f-text" style="margin-top: 8px;">Passwords must be at least 6 characters long. Passwords are case sensitive.</div>
                     </fieldset>
 
                     <fieldset class="f-fieldset">
@@ -152,17 +167,17 @@
                         <legend class="f-legend">You must be invited to join this forum</legend>
                         <label class="f-label">Invitation code</label>
                         <input type="text" class="f-input" id="regInvite">
-                        <div class="f-text" style="color: #5b84a9; cursor: pointer;">Need an invite code?</div>
+                        <div class="f-text" style="color: var(--legend-blue); cursor: pointer; margin-top: 4px;">Need an invite code?</div>
                     </fieldset>
 
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Set your localisation options</legend>
                         <div class="f-text">For the forum to display times correctly you must select your local time zone. If Daylight Savings Time is in effect you should also check the option provided which will advance times by 1 hour.</div>
-                        <label class="f-label" style="margin-top:10px;">Time zone</label>
-                        <select class="f-input" style="width: 100%; max-width: 400px; background: #1a1a1a;">
+                        <label class="f-label" style="margin-top:8px;">Time zone</label>
+                        <select class="f-select">
                             <option>(UTC+05:00) Pakistan</option>
                         </select>
-                        <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px;">
                             <input type="checkbox" checked>
                             <span class="f-text" style="margin: 0; color: #ccc;">Daylight Savings Time is in effect (advance time by 1 hour).</span>
                         </div>
@@ -171,8 +186,8 @@
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Set your privacy options</legend>
                         <div class="f-text">Select whether you want your email address to be viewable to other users or not and if you want other users to be able to send you email via the forum (form email) or not.</div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                            <label style="display: flex; align-items: center; gap: 8px;">
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 6px;">
                                 <input type="radio" name="privacy"> <span class="f-text" style="margin: 0; color: #ccc;">Display your email address to other users.</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px;">
@@ -184,60 +199,85 @@
                         </div>
                     </fieldset>
 
-                    <!-- НАСТОЯЩАЯ Google reCAPTCHA -->
+                    <!-- Google reCAPTCHA v2 -->
                     <fieldset class="f-fieldset" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
                         <legend class="f-legend">Are you a human?</legend>
                         <div class="f-text">Please prove that you're a human being.</div>
                         
-                        <div class="g-recaptcha" data-sitekey="6LeT_80tAAAAANc6m12sLRne7UCH1YMM4BwbngYC" data-theme="dark" style="margin-top: 15px;"></div>
-                        
+                        <div class="g-recaptcha" data-sitekey="6LeT_80tAAAAANc6m12sLRne7UCH1YMM4BwbngYC" data-theme="dark" style="margin-top: 10px;"></div>
                     </fieldset>
 
                 </div>
-                <div style="padding: 15px 20px 20px 20px;">
-                    <button class="f-btn" onclick="handleForumRegister()">Register</button>
+                <div style="padding: 10px 20px 15px 20px;">
+                    <button class="f-btn" onclick="handleRegister()">Register</button>
                 </div>
             </div>
+        </div>
 
-            <!-- Подвал -->
-            <div class="f-box" style="margin-top: 5px;">
-                <div class="f-content" style="padding: 10px 15px; font-size: 12px; color: #aaa; border: none;">
-                    skebob.vip 2026
+        <!-- СТРАНИЦА: ВХОД / LOGIN -->
+        <div id="viewLogin" class="page-view">
+            <div class="f-box">
+                <div class="f-header">Login</div>
+                <div class="f-content">
+                    <fieldset class="f-fieldset">
+                        <legend class="f-legend">Account Credentials</legend>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div>
+                                <label class="f-label">Email Address</label>
+                                <input type="email" class="f-input" id="loginEmail">
+                            </div>
+                            <div>
+                                <label class="f-label">Password</label>
+                                <input type="password" class="f-input" id="loginPass">
+                            </div>
+                        </div>
+                    </fieldset>
+                    <button class="f-btn" onclick="handleLogin()">Sign In</button>
                 </div>
             </div>
-            
         </div>
-    </div>
 
-    <!-- Модалка Логина -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal-box gs-box">
-            <h2>Login</h2>
-            <input type="email" id="loginEmail" class="gs-input" placeholder="Email">
-            <input type="password" id="loginPass" class="gs-input" placeholder="Password">
-            <button class="gs-btn" onclick="handleLogin()">Sign In</button>
-            <span class="close-link" onclick="closeModals()">Cancel</span>
-        </div>
-    </div>
+        <!-- СТРАНИЦА: ЛИЧНЫЙ КАБИНЕТ / USER PANEL -->
+        <div id="viewProfile" class="page-view">
+            <div class="f-box">
+                <div class="f-header">User Control Panel</div>
+                <div class="f-content">
+                    
+                    <div class="profile-card">
+                        <img id="profileAvatar" src="https://via.placeholder.com/54/000000/8acc14?text=U" class="profile-avatar" alt="Avatar">
+                        <div>
+                            <div style="font-weight: bold; color: #ffffff;" id="userDisplayTitle">User</div>
+                            <div style="color: var(--accent-green); font-size: 11px;">Status: Active Member</div>
+                        </div>
+                    </div>
 
-    <!-- Окно Профиля -->
-    <div class="modal-overlay" id="dashboardOverlay">
-        <div class="modal-box gs-box" style="width: 400px;">
-            <div class="close-btn" onclick="closeModals()">×</div>
-            <div class="profile-header">
-                <img id="profileAvatar" src="https://via.placeholder.com/64/1a1a1a/8acc14?text=U" alt="Avatar" class="profile-avatar">
-                <div class="profile-info">
-                    <h2 id="userEmailDisplay">loading...</h2>
-                    <span>UID: Active</span>
+                    <fieldset class="f-fieldset">
+                        <legend class="f-legend">Modify Profile Settings</legend>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div>
+                                <label class="f-label">Change Username</label>
+                                <input type="text" class="f-input" id="nicknameInput" placeholder="New display name">
+                            </div>
+                            <div>
+                                <label class="f-label">Avatar URL</label>
+                                <input type="text" class="f-input" id="avatarUrlInput" placeholder="https://image-link.png">
+                            </div>
+                        </div>
+                        <button class="f-btn" style="margin-top: 12px;" onclick="handleUpdateProfile()">Save Changes</button>
+                    </fieldset>
+
+                    <button class="f-btn" style="color: #ff5555;" onclick="handleLogout()">Log Out</button>
                 </div>
             </div>
-            <div style="border-top: 1px solid var(--border-out); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); padding-top: 20px; display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                <input type="text" id="nicknameInput" class="gs-input" placeholder="New Username">
-                <input type="text" id="avatarUrlInput" class="gs-input" placeholder="Avatar Image URL">
-                <button class="gs-btn" onclick="handleUpdateProfile()">Save Settings</button>
-            </div>
-            <button class="gs-btn" style="color: #ff4444;" onclick="handleLogout()">Log Out</button>
         </div>
+
+        <!-- Подвал форума GS -->
+        <div class="f-box" style="margin-top: 8px;">
+            <div class="f-content" style="padding: 8px 12px; font-size: 11px; color: #888888; border: none;">
+                skebob.vip 2026
+            </div>
+        </div>
+        
     </div>
 
     <script type="module">
@@ -258,21 +298,30 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Управление окнами
-        window.openForum = function() { document.getElementById('forumOverlay').style.display = 'block'; }
-        window.closeForum = function() { document.getElementById('forumOverlay').style.display = 'none'; }
-        
-        window.openModal = function(modalId) {
-            closeModals();
-            document.getElementById(modalId).style.display = 'flex';
-        }
-        window.closeModals = function() {
-            document.getElementById('loginModal').style.display = 'none';
-            document.getElementById('dashboardOverlay').style.display = 'none';
+        // Переключение между вкладками
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.f-nav a').forEach(el => el.classList.remove('active'));
+            
+            if (tabName === 'index') {
+                document.getElementById('viewIndex').classList.add('active');
+                document.getElementById('navIndex').classList.add('active');
+            } else if (tabName === 'register') {
+                document.getElementById('viewRegister').classList.add('active');
+                document.getElementById('navRegister').classList.add('active');
+            } else if (tabName === 'login') {
+                document.getElementById('viewLogin').classList.add('active');
+                document.getElementById('navLogin').classList.add('active');
+            } else if (tabName === 'profile') {
+                document.getElementById('viewProfile').classList.add('active');
+                if (document.getElementById('navProfile')) {
+                    document.getElementById('navProfile').classList.add('active');
+                }
+            }
         }
 
-        // Регистрация на форуме с проверкой Капчи
-        window.handleForumRegister = async function() {
+        // Обработка регистрации
+        window.handleRegister = async function() {
             const user = document.getElementById('regUser').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value.trim();
@@ -280,19 +329,24 @@
             const code = document.getElementById('regInvite').value.trim();
             
             // Проверка Google reCAPTCHA
-            const recaptchaResponse = grecaptcha.getResponse();
-            if (recaptchaResponse.length === 0) { 
-                alert('Пожалуйста, пройдите проверку "Я не робот"!'); 
-                return; 
+            if (typeof grecaptcha !== 'undefined') {
+                const recaptchaResponse = grecaptcha.getResponse();
+                if (recaptchaResponse.length === 0) { 
+                    alert('Please complete the "Are you a human?" check.'); 
+                    return; 
+                }
             }
 
-            if (!email || !pass || !code) { alert('Fill all required fields!'); return; }
+            if (!email || !pass || !code) { alert('Please fill in all required fields!'); return; }
             if (pass !== passConfirm) { alert('Passwords do not match!'); return; }
 
             try {
                 const inviteRef = doc(db, "invites", code);
                 const inviteSnap = await getDoc(inviteRef);
-                if (!inviteSnap.exists() || inviteSnap.data().used) { alert('Invalid or used invite code!'); return; }
+                if (!inviteSnap.exists() || inviteSnap.data().used) { 
+                    alert('Invalid or already used invite code!'); 
+                    return; 
+                }
                 
                 await createUserWithEmailAndPassword(auth, email, pass);
                 await updateDoc(inviteRef, { used: true });
@@ -301,19 +355,30 @@
                     await updateProfile(auth.currentUser, { displayName: user });
                 }
                 
-                closeForum();
-            } catch (error) { alert('Error: ' + error.message); }
+                switchTab('index');
+            } catch (error) { 
+                alert('Error: ' + error.message); 
+            }
         }
 
-        // Логин и выход
+        // Вход и выход
         window.handleLogin = async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            if (!email || !pass) return;
+            
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
-                closeModals();
-                openForum();
-            } catch (error) { alert('Error: ' + error.message); }
+                await signInWithEmailAndPassword(auth, email, pass);
+                switchTab('index');
+            } catch (error) { 
+                alert('Error: ' + error.message); 
+            }
         }
-        window.handleLogout = async function() { await signOut(auth); closeModals(); }
+
+        window.handleLogout = async function() { 
+            await signOut(auth); 
+            switchTab('index'); 
+        }
 
         // Обновление профиля
         window.handleUpdateProfile = async function() {
@@ -323,47 +388,46 @@
             if (url) updateData.photoURL = url;
             if (nickname) updateData.displayName = nickname;
             if (Object.keys(updateData).length === 0) return;
+            
             try {
                 await updateProfile(auth.currentUser, updateData);
                 if (url) document.getElementById('profileAvatar').src = url;
-                if (nickname) document.getElementById('userEmailDisplay').textContent = nickname;
+                if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
                 document.getElementById('avatarUrlInput').value = '';
                 document.getElementById('nicknameInput').value = '';
-                alert('Profile updated!');
-            } catch (error) { alert('Error: ' + error.message); }
+                alert('Profile updated successfully!');
+            } catch (error) { 
+                alert('Error: ' + error.message); 
+            }
         }
 
-        // Слушатель статуса
+        // Слушатель состояния авторизации
         onAuthStateChanged(auth, (user) => {
-            const forumNav = document.getElementById('forumNavLinks');
-            const forumStatus = document.getElementById('forumStatusText');
-            const regBox = document.getElementById('forumRegisterBox');
+            const navBar = document.getElementById('navBar');
+            const statusText = document.getElementById('statusText');
             
             if (user) {
-                forumNav.innerHTML = `
-                    <a href="#" onclick="closeForum()">Index</a>
-                    <a href="#" onclick="openModal('dashboardOverlay')">User Panel</a>
+                navBar.innerHTML = `
+                    <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
+                    <a href="#" id="navProfile" onclick="switchTab('profile')">User Control Panel</a>
                 `;
-                forumStatus.textContent = `Welcome back, ${user.displayName ? user.displayName : user.email}`;
-                regBox.style.display = 'none'; 
+                statusText.textContent = `Welcome back, ${user.displayName ? user.displayName : user.email}`;
                 
-                document.getElementById('userEmailDisplay').textContent = user.displayName ? user.displayName : user.email;
-                document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/64/1a1a1a/8acc14?text=U";
+                document.getElementById('userDisplayTitle').textContent = user.displayName ? user.displayName : user.email;
+                document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/54/000000/8acc14?text=U";
             } else {
-                forumNav.innerHTML = `
-                    <a href="#" onclick="closeForum()">Index</a>
-                    <a href="#" style="font-weight:bold;">Register</a>
-                    <a href="#" onclick="openModal('loginModal')">Login</a>
+                navBar.innerHTML = `
+                    <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
+                    <a href="#" id="navRegister" onclick="switchTab('register')">Register</a>
+                    <a href="#" id="navLogin" onclick="switchTab('login')">Login</a>
                 `;
-                forumStatus.textContent = `You are not logged in.`;
-                regBox.style.display = 'block'; 
-                closeModals();
+                statusText.textContent = `You are not logged in.`;
                 
-                // Сбрасываем капчу при выходе
                 if (typeof grecaptcha !== 'undefined') {
-                    grecaptcha.reset();
+                    try { grecaptcha.reset(); } catch(e) {}
                 }
             }
+            switchTab('index');
         });
     </script>
 </body>
