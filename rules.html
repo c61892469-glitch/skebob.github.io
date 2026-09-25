@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>skebob.vip - Community Rules</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
+    <style>
+        :root { --bg-deep: #0e0e0e; --bg-box: #222222; --bg-header: #2c2c2c; --bg-nav: #2a2a2a; --border-dark: #111111; --border-light: #333333; --text-main: #cccccc; --text-muted: #aaaaaa; --legend-blue: #5b84a9; --accent-green: #8acc14; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
+        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; font-size: 11px; }
+        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
+        .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 40px auto; }
+        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
+        .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; }
+        .f-content { padding: 16px 20px; border-top: 1px solid var(--border-light); line-height: 1.6; color: #bbb; font-size: 11px; }
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; justify-content: space-between; align-items: center; }
+        .f-nav-links { display: flex; gap: 12px; }
+        .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
+        .f-nav a:hover, .f-nav a.active { color: #ffffff; text-decoration: underline; font-weight: bold; }
+        
+        .rule-section { margin-bottom: 16px; }
+        .rule-title { font-weight: bold; color: #dddddd; font-size: 12px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .rule-title::before { content: "»"; color: var(--accent-green); }
+        .rule-text { padding-left: 14px; color: #999999; }
+        
+        .warning-box { background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 10px; border-radius: 2px; margin-top: 20px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="top-line"></div>
+    <div class="forum-wrapper">
+        <div class="f-box">
+            <div class="f-content" style="padding: 10px 14px;">
+                <div style="font-size: 22px; cursor: pointer;" onclick="location.href='index.html'">
+                    <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
+                </div>
+                <div class="f-nav">
+                    <div class="f-nav-links">
+                        <a href="index.html">Index</a>
+                        <a href="forum.html">Forums & Configs</a>
+                        <a href="profile.html">User Control Panel</a>
+                    </div>
+                    <div><a href="rules.html" class="active" style="color: var(--accent-green);">Rules</a></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="f-box">
+            <div class="f-header">Community Guidelines & Terms of Service</div>
+            <div class="f-content">
+                <div style="margin-bottom: 20px; color: #ccc;">
+                    Welcome to <b>skebob.vip</b>. To maintain a high-quality environment for all members, you are required to strictly adhere to the following rules. Ignorance of the rules is not an excuse.
+                </div>
+
+                <div class="rule-section">
+                    <div class="rule-title">1. General Conduct</div>
+                    <div class="rule-text">
+                        Maintain a respectful attitude towards other members and staff. Excessive toxicity, harassment, racism, and begging will not be tolerated. Keep discussions relevant and constructive.
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <div class="rule-title">2. Configuration & Lua Submissions</div>
+                    <div class="rule-text">
+                        When submitting a CFG or Lua script for approval, you must provide a detailed description and at least one in-game screenshot (e.g., visuals or menu). Empty threads or low-effort submissions will be automatically rejected by the staff.
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <div class="rule-title">3. Malicious Software</div>
+                    <div class="rule-text">
+                        Uploading malware, RATs, stealers, or any harmful software disguised as configurations or scripts is strictly prohibited. Any attempt to compromise other users' security will result in a permanent hardware ID (HWID) and IP ban.
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <div class="rule-title">4. Invites & Account Sharing</div>
+                    <div class="rule-text">
+                        Account sharing is forbidden. Selling, trading, or buying invite codes outside of official channels is strictly prohibited. If you are caught selling invites, both you and your invitee will have your accounts permanently terminated.
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    Violation of any of these rules may result in immediate suspension or permanent termination of your account without prior notice.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
