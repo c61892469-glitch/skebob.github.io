@@ -638,6 +638,7 @@
                 
                 if (user) {
                     await updateProfile(userObj, { displayName: user });
+                    await setDoc(doc(db, "users", userObj.uid), { displayName: user }, { merge: true });
                 }
                 
                 showSuccess('regSuccessMsg', 'Registration successful! A verification link has been sent to your email.');
@@ -672,8 +673,10 @@
             clearErrors();
             const fileInput = document.getElementById('avatarFileInput');
             const nickname = document.getElementById('nicknameInput').value.trim();
-            const updateData = {};
+            const user = auth.currentUser;
+            if (!user) return;
 
+            const updateData = {};
             if (nickname) updateData.displayName = nickname;
 
             if (fileInput.files && fileInput.files[0]) {
@@ -684,7 +687,7 @@
                     img.src = e.target.result;
                     img.onload = async function() {
                         const canvas = document.createElement('canvas');
-                        const MAX_SIZE = 120;
+                        const MAX_SIZE = 100;
                         let width = img.width;
                         let height = img.height;
                         if (width > height) {
@@ -696,19 +699,24 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 
                         try {
-                            await updateProfile(auth.currentUser, {
-                                ...updateData,
-                                photoURL: dataUrl
-                            });
+                            await setDoc(doc(db, "users", user.uid), {
+                                photoURL: dataUrl,
+                                ...(nickname ? { displayName: nickname } : {})
+                            }, { merge: true });
+
+                            if (nickname) {
+                                await updateProfile(user, { displayName: nickname });
+                                document.getElementById('userDisplayTitle').textContent = nickname;
+                            }
+
                             document.getElementById('profileAvatar').src = dataUrl;
-                            if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
                             fileInput.value = '';
                             document.getElementById('nicknameInput').value = '';
                         } catch (err) {
-                            showError('profileErrorMsg', 'Failed to update profile settings.');
+                            showError('profileErrorMsg', 'Failed to save avatar to database.');
                         }
                     }
                 }
@@ -716,8 +724,11 @@
             } else {
                 if (Object.keys(updateData).length === 0) return;
                 try {
-                    await updateProfile(auth.currentUser, updateData);
-                    if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
+                    if (nickname) {
+                        await updateProfile(user, { displayName: nickname });
+                        await setDoc(doc(db, "users", user.uid), { displayName: nickname }, { merge: true });
+                        document.getElementById('userDisplayTitle').textContent = nickname;
+                    }
                     document.getElementById('nicknameInput').value = '';
                 } catch (error) { 
                     showError('profileErrorMsg', 'Failed to update profile settings.');
@@ -745,21 +756,28 @@
                 statusText.textContent = `Welcome back, ${user.displayName ? user.displayName : user.email}`;
                 
                 document.getElementById('userDisplayTitle').textContent = user.displayName ? user.displayName : user.email;
-                document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/48/000000/8acc14?text=U";
                 
-                // Проверяем роль из Firestore
                 try {
                     const userDocSnap = await getDoc(doc(db, "users", user.uid));
-                    if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-                        adminPanelSection.style.display = 'block';
-                        userStatusText.textContent = "Status: Administrator";
-                        userStatusText.style.color = "#8acc14";
-                    } else {
-                        adminPanelSection.style.display = 'none';
-                        userStatusText.textContent = "Status: Active Member";
+                    if (userDocSnap.exists()) {
+                        const data = userDocSnap.data();
+                        if (data.photoURL) {
+                            document.getElementById('profileAvatar').src = data.photoURL;
+                        } else {
+                            document.getElementById('profileAvatar').src = "https://via.placeholder.com/48/000000/8acc14?text=U";
+                        }
+
+                        if (data.role === 'admin') {
+                            adminPanelSection.style.display = 'block';
+                            userStatusText.textContent = "Status: Administrator";
+                            userStatusText.style.color = "#8acc14";
+                        } else {
+                            adminPanelSection.style.display = 'none';
+                            userStatusText.textContent = "Status: Active Member";
+                        }
                     }
                 } catch (e) {
-                    adminPanelSection.style.display = 'none';
+                    document.getElementById('profileAvatar').src = "https://via.placeholder.com/48/000000/8acc14?text=U";
                 }
 
                 indexLoggedOut.style.display = 'none';
