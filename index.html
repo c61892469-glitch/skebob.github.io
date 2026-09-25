@@ -96,7 +96,6 @@
         
         .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
         
-        /* IN-SITE ERROR & SUCCESS MESSAGE STYLING */
         .f-error-msg {
             display: none;
             background: #2d1313;
@@ -172,16 +171,30 @@
             <div id="indexLoggedIn" class="f-box" style="display: none;">
                 <div class="f-header">Information</div>
                 <div class="f-content">
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">skebob.vip Loader & Scripts</legend>
-                        <div class="f-text" style="margin-bottom: 10px;">
-                            Welcome to skebob.vip. You can download the official lua script below.
+                    
+                    <!-- Если почта НЕ подтверждена -->
+                    <div id="unverifiedWarning" style="display: none;">
+                        <div class="f-error-msg" style="display: block; margin-bottom: 10px;">
+                            Ваш адрес электронной почты не подтвержден! Пожалуйста, проверьте свою почту и перейдите по ссылке из письма для разблокировки доступа к скачиванию скрипта.
                         </div>
-                        <a href="#" onclick="downloadScript(event)" class="f-btn">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8acc14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Download LUA Script
-                        </a>
-                    </fieldset>
+                        <button class="f-btn" onclick="resendVerificationEmail()">Отправить письмо повторно</button>
+                        <div class="f-success-msg" id="resendSuccess" style="margin-top: 8px;"></div>
+                    </div>
+
+                    <!-- Если почта подтверждена -->
+                    <div id="verifiedContent" style="display: none;">
+                        <fieldset class="f-fieldset">
+                            <legend class="f-legend">skebob.vip Loader & Scripts</legend>
+                            <div class="f-text" style="margin-bottom: 10px;">
+                                Welcome to skebob.vip. You can download the official lua script below.
+                            </div>
+                            <a href="#" onclick="downloadScript(event)" class="f-btn">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8acc14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Download LUA Script
+                            </a>
+                        </fieldset>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -440,8 +453,10 @@
 
         function clearErrors() {
             document.querySelectorAll('.f-error-msg, .f-success-msg').forEach(el => {
-                el.textContent = '';
-                el.style.display = 'none';
+                if(el.id !== 'unverifiedWarning') {
+                    el.textContent = '';
+                    el.style.display = 'none';
+                }
             });
         }
 
@@ -470,6 +485,18 @@
                 window.URL.revokeObjectURL(url);
             } catch (err) {
                 window.open(fileUrl, '_blank');
+            }
+        }
+
+        window.resendVerificationEmail = async function() {
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    await sendEmailVerification(user);
+                    showSuccess('resendSuccess', 'Письмо с подтверждением отправлено повторно!');
+                } catch (err) {
+                    showError('resendSuccess', 'Ошибка отправки. Попробуйте позже.');
+                }
             }
         }
 
@@ -578,9 +605,7 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const userObj = userCredential.user;
 
-                // Отправляем письмо с подтверждением
                 await sendEmailVerification(userObj);
-
                 await updateDoc(inviteRef, { used: true });
                 
                 if (user) {
@@ -641,6 +666,9 @@
             const indexLoggedOut = document.getElementById('indexLoggedOut');
             const indexLoggedIn = document.getElementById('indexLoggedIn');
             
+            const unverifiedWarning = document.getElementById('unverifiedWarning');
+            const verifiedContent = document.getElementById('verifiedContent');
+            
             if (user) {
                 navBar.innerHTML = `
                     <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
@@ -653,6 +681,15 @@
                 
                 indexLoggedOut.style.display = 'none';
                 indexLoggedIn.style.display = 'block';
+
+                // Проверяем подтвержден ли email
+                if (user.emailVerified) {
+                    unverifiedWarning.style.display = 'none';
+                    verifiedContent.style.display = 'block';
+                } else {
+                    unverifiedWarning.style.display = 'block';
+                    verifiedContent.style.display = 'none';
+                }
                 
                 switchTab('index');
             } else {
