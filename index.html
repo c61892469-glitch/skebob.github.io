@@ -47,12 +47,34 @@
         .save-btn:hover { background: #76b900; color: #000; border-color: #76b900; }
         .logout-btn { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: 600; }
         .logout-btn:hover { background: #ef4444; color: #fff; }
-        .close-dashboard { position: absolute; top: 15px; right: 20px; color: #777; cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
+        
+        .close-dashboard { position: absolute; top: 15px; right: 20px; color: #777; cursor: pointer; font-size: 1.5rem; transition: 0.2s; z-index: 10; }
         .close-dashboard:hover { color: #fff; }
 
-        /* Стили Форума */
-        .forum-content { background: #141414; border: 1px solid #222; padding: 25px; border-radius: 8px; width: 600px; height: 70vh; display: flex; flex-direction: column; gap: 15px; position: relative; }
-        .forum-content h2 { color: #fff; font-size: 1.3rem; margin-bottom: 5px; }
+        /* ОБНОВЛЕННЫЕ СТИЛИ ФОРУМА (С МЕНЮ) */
+        .forum-content { 
+            background: #141414; border: 1px solid #222; border-radius: 8px; 
+            width: 850px; height: 80vh; display: flex; flex-direction: row; position: relative; overflow: hidden;
+        }
+        .forum-sidebar {
+            width: 220px; background: #0b0b0b; border-right: 1px solid #222; 
+            padding: 20px 10px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
+        }
+        .forum-chat-area {
+            flex-grow: 1; display: flex; flex-direction: column; padding: 25px; gap: 15px; background: #141414;
+        }
+        .forum-chat-area h2 { color: #fff; font-size: 1.3rem; margin-bottom: 5px; }
+        
+        /* Кнопки категорий */
+        .category-group { display: flex; flex-direction: column; gap: 5px; }
+        .category-title { color: #76b900; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; padding-left: 10px; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .category-btn { 
+            background: transparent; border: none; color: #9ca3af; text-align: left; 
+            padding: 10px 12px; border-radius: 4px; cursor: pointer; transition: 0.2s; font-size: 0.9rem;
+        }
+        .category-btn:hover { background: #1c1c1c; color: #fff; }
+        .category-btn.active { background: #76b900; color: #000; font-weight: bold; }
+
         .messages-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 10px; background: #0b0b0b; border: 1px solid #222; border-radius: 6px; padding: 15px; }
         .post { display: flex; gap: 12px; }
         .post img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #333; object-fit: cover; }
@@ -64,15 +86,15 @@
         .chat-input-area input:focus { border-color: #76b900; }
         .chat-input-area button { background: #76b900; color: #000; border: none; padding: 0 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         
-        /* Скроллбар для чата */
         .messages-container::-webkit-scrollbar { width: 6px; }
         .messages-container::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .forum-sidebar::-webkit-scrollbar { width: 4px; }
+        .forum-sidebar::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div class="rgb-line"></div>
-
     <div class="auth-nav" id="authNav"></div>
 
     <div class="container" id="mainContainer">
@@ -131,25 +153,50 @@
         </div>
     </div>
 
-    <!-- Окно Форума -->
+    <!-- НОВОЕ Окно Форума с разделами -->
     <div class="dashboard-overlay" id="forumOverlay">
         <div class="forum-content">
-            <div class="close-dashboard" onclick="closeModals()">×</div>
-            <h2>VIP Community Forum</h2>
-            <div class="messages-container" id="messagesContainer">
-                <!-- Сообщения будут грузиться сюда -->
+            
+            <!-- Боковое меню -->
+            <div class="forum-sidebar">
+                <div class="category-group">
+                    <button class="category-btn active" onclick="switchCategory('general', 'Просто общение')" id="btn-general">💬 Просто общение</button>
+                </div>
+                
+                <div class="category-group">
+                    <span class="category-title">GAMESENSE</span>
+                    <button class="category-btn" onclick="switchCategory('gs_issues', 'Gamesense: Проблемы')" id="btn-gs_issues">Проблемы</button>
+                    <button class="category-btn" onclick="switchCategory('gs_cfg', 'Gamesense: CFG')" id="btn-gs_cfg">Обмен CFG</button>
+                    <button class="category-btn" onclick="switchCategory('gs_lua', 'Gamesense: LUA')" id="btn-gs_lua">LUA Скрипты</button>
+                </div>
+
+                <div class="category-group">
+                    <span class="category-title">NEVERLOSE</span>
+                    <button class="category-btn" onclick="switchCategory('nl_issues', 'Neverlose: Проблемы')" id="btn-nl_issues">Проблемы</button>
+                    <button class="category-btn" onclick="switchCategory('nl_cfg', 'Neverlose: CFG')" id="btn-nl_cfg">Обмен CFG</button>
+                    <button class="category-btn" onclick="switchCategory('nl_lua', 'Neverlose: LUA')" id="btn-nl_lua">LUA Скрипты</button>
+                </div>
             </div>
-            <div class="chat-input-area">
-                <input type="text" id="postInput" placeholder="Написать сообщение..." onkeypress="if(event.key === 'Enter') handleSendPost()">
-                <button onclick="handleSendPost()">Send</button>
+
+            <!-- Зона чата -->
+            <div class="forum-chat-area">
+                <div class="close-dashboard" onclick="closeModals()">×</div>
+                <h2 id="currentForumTitle">Просто общение</h2>
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Сообщения грузятся сюда -->
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="postInput" placeholder="Написать сообщение..." onkeypress="if(event.key === 'Enter') handleSendPost()">
+                    <button onclick="handleSendPost()">Send</button>
+                </div>
             </div>
+
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        // Добавлены функции для работы с коллекциями и реальным временем!
         import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -165,13 +212,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let unsubscribeForum = null; // Для остановки прослушивания форума при закрытии
+        let unsubscribeForum = null;
+        window.currentForumCategory = 'general'; // По умолчанию открыт General чат
 
         window.openModal = function(modalId) {
             closeModals();
             document.getElementById(modalId).style.display = 'flex';
-            
-            // Если открыли форум, начинаем слушать сообщения из БД
             if(modalId === 'forumOverlay') {
                 loadForumPosts();
             }
@@ -189,62 +235,20 @@
             }
         }
 
-        window.handleRegister = async function() {
-            const email = document.getElementById('regEmail').value.trim();
-            const pass = document.getElementById('regPass').value.trim();
-            const code = document.getElementById('regInvite').value.trim();
-
-            if (!email || !pass || !code) { alert('Заполните все поля!'); return; }
-
-            try {
-                const inviteRef = doc(db, "invites", code);
-                const inviteSnap = await getDoc(inviteRef);
-
-                if (!inviteSnap.exists() || inviteSnap.data().used) {
-                    alert('Ошибка: Инвайт-код не существует или уже использован!');
-                    return;
-                }
-
-                await createUserWithEmailAndPassword(auth, email, pass);
-                await updateDoc(inviteRef, { used: true });
-                alert('Успешно зарегистрировано!');
-                closeModals();
-            } catch (error) { alert('Ошибка: ' + error.message); }
-        }
-
-        window.handleLogin = async function() {
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
-                closeModals();
-            } catch (error) { alert('Ошибка: ' + error.message); }
-        }
-
-        window.handleLogout = async function() {
-            await signOut(auth);
-            closeModals();
-        }
-
-        window.handleUpdateProfile = async function() {
-            const url = document.getElementById('avatarUrlInput').value.trim();
-            const nickname = document.getElementById('nicknameInput').value.trim();
+        // --- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ КАТЕГОРИЙ ---
+        window.switchCategory = function(categoryId, categoryTitle) {
+            window.currentForumCategory = categoryId;
+            document.getElementById('currentForumTitle').textContent = categoryTitle;
             
-            const updateData = {};
-            if (url) updateData.photoURL = url;
-            if (nickname) updateData.displayName = nickname;
+            // Убираем класс active у всех кнопок
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            // Добавляем active нажатой кнопке
+            document.getElementById('btn-' + categoryId).classList.add('active');
 
-            if (Object.keys(updateData).length === 0) return;
-            
-            try {
-                await updateProfile(auth.currentUser, updateData);
-                if (url) document.getElementById('profileAvatar').src = url;
-                if (nickname) document.getElementById('userEmailDisplay').textContent = nickname;
-                document.getElementById('avatarUrlInput').value = '';
-                document.getElementById('nicknameInput').value = '';
-                alert('Профиль обновлен!');
-            } catch (error) { alert('Ошибка: ' + error.message); }
+            // Перезагружаем сообщения для новой категории
+            loadForumPosts();
         }
 
-        // --- ЛОГИКА ФОРУМА ---
         window.handleSendPost = async function() {
             const input = document.getElementById('postInput');
             const text = input.value.trim();
@@ -255,8 +259,9 @@
             const photoURL = user.photoURL ? user.photoURL : "https://via.placeholder.com/80/0b0b0b/76b900?text=VIP";
 
             try {
-                // Создаем документ в коллекции posts
-                await addDoc(collection(db, "posts"), {
+                // Пишем в коллекцию, которая зависит от выбранной категории (например "forum_gs_cfg")
+                const collectionName = "forum_" + window.currentForumCategory;
+                await addDoc(collection(db, collectionName), {
                     text: text,
                     author: displayName,
                     avatar: photoURL,
@@ -270,9 +275,15 @@
 
         function loadForumPosts() {
             const container = document.getElementById('messagesContainer');
-            const q = query(collection(db, "posts"), orderBy("createdAt", "asc"));
             
-            // onSnapshot слушает БД в реальном времени!
+            // Если мы уже слушали другой чат - отключаем прослушивание
+            if(unsubscribeForum) {
+                unsubscribeForum();
+            }
+
+            const collectionName = "forum_" + window.currentForumCategory;
+            const q = query(collection(db, collectionName), orderBy("createdAt", "asc"));
+            
             unsubscribeForum = onSnapshot(q, (snapshot) => {
                 container.innerHTML = '';
                 snapshot.forEach((doc) => {
@@ -288,16 +299,57 @@
                     `;
                     container.appendChild(div);
                 });
-                // Скролл вниз при новом сообщении
                 container.scrollTop = container.scrollHeight;
             });
         }
 
-        // --- ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ---
+        // --- АВТОРИЗАЦИЯ И ПРОФИЛЬ (БЕЗ ИЗМЕНЕНИЙ) ---
+        window.handleRegister = async function() {
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const code = document.getElementById('regInvite').value.trim();
+            if (!email || !pass || !code) return;
+            try {
+                const inviteRef = doc(db, "invites", code);
+                const inviteSnap = await getDoc(inviteRef);
+                if (!inviteSnap.exists() || inviteSnap.data().used) {
+                    alert('Ошибка: Инвайт-код не существует или уже использован!'); return;
+                }
+                await createUserWithEmailAndPassword(auth, email, pass);
+                await updateDoc(inviteRef, { used: true });
+                alert('Успешно зарегистрировано!'); closeModals();
+            } catch (error) { alert('Ошибка: ' + error.message); }
+        }
+
+        window.handleLogin = async function() {
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
+                closeModals();
+            } catch (error) { alert('Ошибка: ' + error.message); }
+        }
+
+        window.handleLogout = async function() { await signOut(auth); closeModals(); }
+
+        window.handleUpdateProfile = async function() {
+            const url = document.getElementById('avatarUrlInput').value.trim();
+            const nickname = document.getElementById('nicknameInput').value.trim();
+            const updateData = {};
+            if (url) updateData.photoURL = url;
+            if (nickname) updateData.displayName = nickname;
+            if (Object.keys(updateData).length === 0) return;
+            try {
+                await updateProfile(auth.currentUser, updateData);
+                if (url) document.getElementById('profileAvatar').src = url;
+                if (nickname) document.getElementById('userEmailDisplay').textContent = nickname;
+                document.getElementById('avatarUrlInput').value = '';
+                document.getElementById('nicknameInput').value = '';
+                alert('Профиль обновлен!');
+            } catch (error) { alert('Ошибка: ' + error.message); }
+        }
+
         onAuthStateChanged(auth, (user) => {
             const authNav = document.getElementById('authNav');
             if (user) {
-                // Добавили кнопку Forum в навигацию
                 authNav.innerHTML = `<a onclick="openModal('forumOverlay')">Forum</a> <a onclick="openModal('dashboardOverlay')">Profile</a> <a onclick="handleLogout()">Logout</a>`;
                 document.getElementById('userEmailDisplay').textContent = user.displayName ? user.displayName : user.email;
                 document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/80/0b0b0b/76b900?text=VIP";
