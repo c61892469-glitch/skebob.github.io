@@ -114,16 +114,6 @@
             stroke: currentColor;
         }
 
-        .counter-text {
-            font-size: 0.8rem;
-            color: #555;
-        }
-
-        .counter-text span {
-            color: #76b900;
-            font-weight: 600;
-        }
-
         .modal-overlay, .dashboard-overlay {
             display: none;
             position: fixed;
@@ -196,36 +186,125 @@
             color: #fff;
         }
 
+        /* --- Стили Профиля --- */
         .dashboard-content {
             background: #141414;
             border: 1px solid #222;
-            padding: 40px;
+            padding: 30px;
             border-radius: 8px;
             width: 450px;
-            text-align: center;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        .dashboard-content h2 {
-            color: #fff;
-            font-size: 1.5rem;
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
-        .dashboard-content p {
-            color: #9ca3af;
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid #76b900;
+            object-fit: cover;
+            background: #0b0b0b;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .profile-info h2 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin: 0;
+            word-break: break-all;
+        }
+
+        .vip-badge {
+            background: rgba(118, 185, 0, 0.15);
+            color: #76b900;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #76b900;
+            align-self: flex-start;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-settings {
+            border-top: 1px solid #222;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .profile-settings input {
+            background: #0b0b0b;
+            border: 1px solid #222;
+            padding: 10px;
+            border-radius: 4px;
+            color: #fff;
             font-size: 0.9rem;
+            outline: none;
+        }
+
+        .profile-settings input:focus {
+            border-color: #76b900;
+        }
+
+        .save-btn {
+            background: #1c1c1c;
+            color: #9ca3af;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .save-btn:hover {
+            background: #76b900;
+            color: #000;
+            border-color: #76b900;
         }
 
         .logout-btn {
-            background: #ef4444;
-            color: #fff;
-            border: none;
+            background: transparent;
+            color: #ef4444;
+            border: 1px solid #ef4444;
             padding: 10px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+        
+        .close-dashboard {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: #777;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: 0.2s;
+        }
+        
+        .close-dashboard:hover {
+            color: #fff;
         }
     </style>
 </head>
@@ -234,23 +313,22 @@
     <div class="rgb-line"></div>
 
     <div class="auth-nav" id="authNav">
-        <a onclick="openModal('registerModal')">Register</a>
-        <a onclick="openModal('loginModal')">Login</a>
+        <!-- Кнопки обновляются через JS -->
     </div>
 
     <div class="container" id="mainContainer">
         <h1 class="brand-title">skebob<span>.vip</span></h1>
 
         <div class="download-box">
+            <!-- Счетчик убран, осталась только скачка -->
             <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="download-btn" id="downloadBtn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download
+                Download Script
             </a>
-            <div class="counter-text"><span id="count">0</span></div>
         </div>
     </div>
 
@@ -275,17 +353,32 @@
         </div>
     </div>
 
+    <!-- Обновленный Профиль (Dashboard) -->
     <div class="dashboard-overlay" id="dashboardOverlay">
+        <div class="close-dashboard" onclick="document.getElementById('dashboardOverlay').style.display='none'">×</div>
         <div class="dashboard-content">
-            <h2>Welcome back, <span id="userEmailDisplay" style="color: #76b900;"></span>!</h2>
-            <p>You have active cloud VIP access to skebob.vip scripts.</p>
+            
+            <div class="profile-header">
+                <img id="profileAvatar" src="https://i.imgur.com/6M3GDei.png" alt="Avatar" class="profile-avatar">
+                <div class="profile-info">
+                    <h2 id="userEmailDisplay">loading...</h2>
+                    <span class="vip-badge">VIP STATUS: ACTIVE</span>
+                </div>
+            </div>
+
+            <div class="profile-settings">
+                <input type="text" id="avatarUrlInput" placeholder="URL картинки (нажми Save)">
+                <button class="save-btn" onclick="handleUpdateAvatar()">Save Avatar</button>
+            </div>
+
             <button class="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        // Добавили updateProfile в импорты!
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -309,6 +402,7 @@
         window.closeModals = function() {
             document.getElementById('registerModal').style.display = 'none';
             document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('dashboardOverlay').style.display = 'none';
         }
 
         window.handleRegister = async function() {
@@ -322,7 +416,6 @@
             }
 
             try {
-                // 1. Проверяем инвайт в Firestore
                 const inviteRef = doc(db, "invites", code);
                 const inviteSnap = await getDoc(inviteRef);
 
@@ -337,10 +430,7 @@
                     return;
                 }
 
-                // 2. Создаем аккаунт в Firebase Auth
                 await createUserWithEmailAndPassword(auth, email, pass);
-
-                // 3. Помечаем инвайт как использованный
                 await updateDoc(inviteRef, { used: true });
 
                 alert('Account successfully created!');
@@ -356,6 +446,7 @@
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeModals();
+                document.getElementById('dashboardOverlay').style.display = 'flex';
             } catch (error) {
                 alert('Error: ' + error.message);
             }
@@ -366,33 +457,37 @@
             document.getElementById('dashboardOverlay').style.display = 'none';
         }
 
+        // Новая функция для обновления аватарки
+        window.handleUpdateAvatar = async function() {
+            const url = document.getElementById('avatarUrlInput').value.trim();
+            if (!url) return;
+            
+            try {
+                await updateProfile(auth.currentUser, {
+                    photoURL: url
+                });
+                document.getElementById('profileAvatar').src = url;
+                document.getElementById('avatarUrlInput').value = '';
+                alert('Avatar updated successfully!');
+            } catch (error) {
+                alert('Error updating avatar: ' + error.message);
+            }
+        }
+
         onAuthStateChanged(auth, (user) => {
             const authNav = document.getElementById('authNav');
             const dashboardOverlay = document.getElementById('dashboardOverlay');
             
             if (user) {
-                authNav.innerHTML = `<a onclick="document.getElementById('dashboardOverlay').style.display='flex'">Dashboard</a> <a onclick="handleLogout()">Logout</a>`;
+                authNav.innerHTML = `<a onclick="document.getElementById('dashboardOverlay').style.display='flex'">Profile</a> <a onclick="handleLogout()">Logout</a>`;
                 document.getElementById('userEmailDisplay').textContent = user.email;
+                
+                // Ставим аватарку, если она уже задана, иначе дефолтную темную
+                document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://i.imgur.com/6M3GDei.png";
             } else {
                 authNav.innerHTML = `<a onclick="openModal('registerModal')">Register</a> <a onclick="openModal('loginModal')">Login</a>`;
                 dashboardOverlay.style.display = 'none';
             }
-        });
-
-        const downloadBtn = document.getElementById('downloadBtn');
-        const countSpan = document.getElementById('count');
-        const namespace = 'skebob-vip-downloads';
-        const key = 'script-lua';
-
-        fetch(`https://api.countapi.xyz/get/${namespace}/${key}`)
-            .then(res => res.json())
-            .then(data => { countSpan.textContent = data.value || 0; })
-            .catch(() => { countSpan.textContent = '148'; });
-
-        downloadBtn.addEventListener('click', () => {
-            fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
-                .then(res => res.json())
-                .then(data => { countSpan.textContent = data.value; });
         });
     </script>
 </body>
