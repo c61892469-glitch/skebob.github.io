@@ -355,12 +355,22 @@
                         <img id="profileAvatar" src="https://via.placeholder.com/48/000000/8acc14?text=U" class="profile-avatar" alt="Avatar">
                         <div>
                             <div style="font-weight: bold; color: #ffffff;" id="userDisplayTitle">User</div>
-                            <div style="color: var(--accent-green); font-size: 10px;">Status: Active Member</div>
+                            <div style="color: var(--accent-green); font-size: 10px;" id="userStatusText">Status: Active Member</div>
                         </div>
                     </div>
 
-                    <!-- INVITE CODE GENERATION -->
-                    <fieldset class="f-fieldset">
+                    <!-- ADMIN PANEL (Скрыта, если не админ) -->
+                    <fieldset class="f-fieldset" id="adminPanelSection" style="display: none; border-color: var(--accent-green);">
+                        <legend class="f-legend" style="color: var(--accent-green);">Administrator Panel</legend>
+                        <div class="f-text">You have full administrator privileges. You can instantly generate unlimited invite codes below.</div>
+                        <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <button class="f-btn" onclick="handleAdminGenerateInvite()">Admin Generate Code</button>
+                            <input type="text" class="f-input" id="adminGeneratedInviteInput" readonly placeholder="Click to generate" style="width: 200px; font-weight: bold; color: var(--accent-green); text-align: center;">
+                        </div>
+                    </fieldset>
+
+                    <!-- INVITE CODE GENERATION FOR USERS -->
+                    <fieldset class="f-fieldset" id="userInviteSection">
                         <legend class="f-legend">Invitation Codes</legend>
                         <div class="f-text">You are eligible to generate 1 invitation code every 30 days.</div>
                         <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -377,8 +387,8 @@
                                 <input type="text" class="f-input" id="nicknameInput" placeholder="New display name">
                             </div>
                             <div>
-                                <label class="f-label">Avatar URL</label>
-                                <input type="text" class="f-input" id="avatarUrlInput" placeholder="https://image-link.png">
+                                <label class="f-label">Choose Avatar from Device</label>
+                                <input type="file" class="f-input" id="avatarFileInput" accept="image/*" style="max-width: 300px; padding: 3px;">
                             </div>
                         </div>
                         <button class="f-btn" style="margin-top: 10px;" onclick="handleUpdateProfile()">Save Changes</button>
@@ -518,7 +528,7 @@
 
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
-                    if (userData.lastInviteGeneratedAt) {
+                    if (userData.role !== 'admin' && userData.lastInviteGeneratedAt) {
                         const timePassed = now - userData.lastInviteGeneratedAt;
                         if (timePassed < THIRTY_DAYS) {
                             const daysLeft = Math.ceil((THIRTY_DAYS - timePassed) / (24 * 60 * 60 * 1000));
@@ -544,6 +554,24 @@
 
             } catch (error) {
                 showError('profileErrorMsg', 'Failed to generate invite code. Please try again later.');
+            }
+        }
+
+        window.handleAdminGenerateInvite = async function() {
+            clearErrors();
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const randomCode = 'SKEBOB-ADMIN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                await setDoc(doc(db, "invites", randomCode), {
+                    used: false,
+                    createdBy: user.uid,
+                    createdAt: Date.now()
+                });
+                document.getElementById('adminGeneratedInviteInput').value = randomCode;
+            } catch (err) {
+                showError('profileErrorMsg', 'Failed to generate admin invite code.');
             }
         }
 
@@ -642,25 +670,62 @@
 
         window.handleUpdateProfile = async function() {
             clearErrors();
-            const url = document.getElementById('avatarUrlInput').value.trim();
+            const fileInput = document.getElementById('avatarFileInput');
             const nickname = document.getElementById('nicknameInput').value.trim();
             const updateData = {};
-            if (url) updateData.photoURL = url;
+
             if (nickname) updateData.displayName = nickname;
-            if (Object.keys(updateData).length === 0) return;
-            
-            try {
-                await updateProfile(auth.currentUser, updateData);
-                if (url) document.getElementById('profileAvatar').src = url;
-                if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
-                document.getElementById('avatarUrlInput').value = '';
-                document.getElementById('nicknameInput').value = '';
-            } catch (error) { 
-                showError('profileErrorMsg', 'Failed to update profile settings.');
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = async function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_SIZE = 120;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height) {
+                            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                        } else {
+                            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                        try {
+                            await updateProfile(auth.currentUser, {
+                                ...updateData,
+                                photoURL: dataUrl
+                            });
+                            document.getElementById('profileAvatar').src = dataUrl;
+                            if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
+                            fileInput.value = '';
+                            document.getElementById('nicknameInput').value = '';
+                        } catch (err) {
+                            showError('profileErrorMsg', 'Failed to update profile settings.');
+                        }
+                    }
+                }
+                reader.readAsDataURL(file);
+            } else {
+                if (Object.keys(updateData).length === 0) return;
+                try {
+                    await updateProfile(auth.currentUser, updateData);
+                    if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
+                    document.getElementById('nicknameInput').value = '';
+                } catch (error) { 
+                    showError('profileErrorMsg', 'Failed to update profile settings.');
+                }
             }
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             const navBar = document.getElementById('navBar');
             const statusText = document.getElementById('statusText');
             const indexLoggedOut = document.getElementById('indexLoggedOut');
@@ -668,6 +733,9 @@
             
             const unverifiedWarning = document.getElementById('unverifiedWarning');
             const verifiedContent = document.getElementById('verifiedContent');
+            
+            const adminPanelSection = document.getElementById('adminPanelSection');
+            const userStatusText = document.getElementById('userStatusText');
             
             if (user) {
                 navBar.innerHTML = `
@@ -679,10 +747,24 @@
                 document.getElementById('userDisplayTitle').textContent = user.displayName ? user.displayName : user.email;
                 document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/48/000000/8acc14?text=U";
                 
+                // Проверяем роль из Firestore
+                try {
+                    const userDocSnap = await getDoc(doc(db, "users", user.uid));
+                    if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+                        adminPanelSection.style.display = 'block';
+                        userStatusText.textContent = "Status: Administrator";
+                        userStatusText.style.color = "#8acc14";
+                    } else {
+                        adminPanelSection.style.display = 'none';
+                        userStatusText.textContent = "Status: Active Member";
+                    }
+                } catch (e) {
+                    adminPanelSection.style.display = 'none';
+                }
+
                 indexLoggedOut.style.display = 'none';
                 indexLoggedIn.style.display = 'block';
 
-                // Проверяем подтвержден ли email
                 if (user.emailVerified) {
                     unverifiedWarning.style.display = 'none';
                     verifiedContent.style.display = 'block';
