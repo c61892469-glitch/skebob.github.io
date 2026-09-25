@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>skebob.vip - Profile</title>
+    <title>skebob.vip - User Control Panel</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
     <style>
         :root { --bg-deep: #0e0e0e; --bg-box: #222222; --bg-header: #2c2c2c; --bg-nav: #2a2a2a; --bg-input: #1a1a1a; --border-dark: #111111; --border-light: #333333; --text-main: #cccccc; --text-muted: #aaaaaa; --legend-blue: #5b84a9; --accent-green: #8acc14; }
@@ -19,13 +19,11 @@
         .f-nav a:hover, .f-nav a.active { color: #ffffff; text-decoration: underline; font-weight: bold; }
         .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
         .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
-        .f-label { font-weight: bold; display: block; margin-bottom: 4px; color: #cccccc; font-size: 10px; }
         .f-input { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px 6px; width: 100%; max-width: 250px; outline: none; font-size: 10px; }
-        .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; }
+        .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; display: inline-block; text-decoration: none; }
         .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
-        .profile-card { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; background: #1a1a1a; padding: 8px; border: 1px solid #000000; }
-        .profile-avatar { width: 48px; height: 48px; border: 1px solid #000000; object-fit: cover; background: #000; }
         .f-error-msg { display: none; background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; }
+        .f-success-msg { display: none; background: #132d16; border: 1px solid #22752a; color: #88ff9e; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -36,105 +34,138 @@
                 <div style="font-size: 22px; cursor: pointer;" onclick="location.href='index.html'">
                     <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
                 </div>
+                <!-- Фикс навигации: теперь правильные ссылки на Index и профиль -->
                 <div class="f-nav">
                     <a href="index.html">Index</a>
-                    <a href="forum.html">Forums & Configs</a>
                     <a href="profile.html" class="active">User Control Panel</a>
                 </div>
             </div>
         </div>
 
         <div class="f-box">
-            <div class="f-header">User Control Panel</div>
+            <div class="f-header">User Control Panel - Profile</div>
             <div class="f-content">
                 <div class="f-error-msg" id="profileErrorMsg"></div>
-                <div class="profile-card">
-                    <img id="profileAvatar" src="https://via.placeholder.com/48/000000/8acc14?text=U" class="profile-avatar">
-                    <div>
-                        <div style="font-weight: bold; color: #ffffff;" id="userDisplayTitle">User</div>
-                        <div style="color: var(--accent-green); font-size: 10px;" id="userStatusText">Status: Active Member</div>
-                    </div>
-                </div>
-
-                <fieldset class="f-fieldset" id="adminPanelSection" style="display: none; border-color: var(--accent-green);">
-                    <legend class="f-legend" style="color: var(--accent-green);">Administrator Panel</legend>
-                    <button class="f-btn" id="adminGenBtn">Admin Generate Code</button>
-                    <input type="text" class="f-input" id="adminGeneratedInviteInput" readonly placeholder="Click to generate" style="margin-top: 5px;">
-                </fieldset>
-
+                <div class="f-success-msg" id="profileSuccessMsg"></div>
+                
                 <fieldset class="f-fieldset">
-                    <legend class="f-legend">Modify Profile Settings</legend>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <div><label class="f-label">Change Username</label><input type="text" class="f-input" id="nicknameInput"></div>
-                        <div><label class="f-label">Avatar from Device</label><input type="file" class="f-input" id="avatarFileInput" accept="image/*"></div>
+                    <legend class="f-legend">Account Information</legend>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div><strong style="color: #fff;">Username:</strong> <span id="lblUser">-</span></div>
+                        <div><strong style="color: #fff;">Email:</strong> <span id="lblEmail">-</span></div>
+                        <div><strong style="color: #fff;">Role:</strong> <span id="lblRole" style="color: var(--accent-green);">-</span></div>
                     </div>
-                    <button class="f-btn" style="margin-top: 10px;" id="saveProfileBtn">Save Changes</button>
                 </fieldset>
-                <button class="f-btn" style="color: #ff5555;" id="logoutBtn">Log Out</button>
+
+                <!-- Генерация инвайтов (1 раз в 30 дней) -->
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">Invite System (1 code per 30 days)</legend>
+                    <div style="color: var(--text-muted); font-size: 10px; margin-bottom: 8px;">
+                        You can generate a new invitation code for friends once every 30 days.
+                    </div>
+                    <div id="inviteCooldownText" style="color: #ffaa44; font-size: 10px; margin-bottom: 8px;"></div>
+                    <div style="margin-bottom: 8px;">
+                        <input type="text" class="f-input" id="generatedInviteBox" readonly placeholder="Click button below to generate" style="max-width: 300px; background: #111;">
+                    </div>
+                    <button class="f-btn" id="generateInviteBtn">Generate Invite Code</button>
+                </fieldset>
+
+                <button class="f-btn" id="logoutBtn" style="background: #3a1a1a; border-color: #522;">Log Out</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         const app = initializeApp({ apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10", authDomain: "skebob-vip-4aa40.firebaseapp.com", projectId: "skebob-vip-4aa40", storageBucket: "skebob-vip-4aa40.firebasestorage.app", messagingSenderId: "853888273098", appId: "1:853888273098:web:d46ec3bbb556693edd4233" });
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let currentUserData = null;
+        let currentAuthUser = null;
+
         onAuthStateChanged(auth, async (user) => {
-            if(!user) { location.href = 'login.html'; return; }
-            document.getElementById('userDisplayTitle').textContent = user.displayName || user.email;
-            
-            const userSnap = await getDoc(doc(db, "users", user.uid));
-            if(userSnap.exists()) {
-                const data = userSnap.data();
-                if(data.photoURL) document.getElementById('profileAvatar').src = data.photoURL;
-                if(data.role === 'admin') {
-                    document.getElementById('adminPanelSection').style.display = 'block';
-                    document.getElementById('userStatusText').textContent = "Status: Administrator";
-                }
+            if (!user) {
+                location.href = 'login.html';
+                return;
+            }
+            currentAuthUser = user;
+            document.getElementById('lblEmail').textContent = user.email;
+            document.getElementById('lblUser').textContent = user.displayName || 'Member';
+
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                currentUserData = userSnap.data();
+                document.getElementById('lblRole').textContent = currentUserData.role || 'member';
+                checkInviteCooldown();
             }
         });
 
-        document.getElementById('saveProfileBtn').onclick = async () => {
-            const user = auth.currentUser;
-            const fileInput = document.getElementById('avatarFileInput');
-            const nickname = document.getElementById('nicknameInput').value.trim();
+        function checkInviteCooldown() {
+            const cooldownText = document.getElementById('inviteCooldownText');
+            const genBtn = document.getElementById('generateInviteBtn');
             
-            if(fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = async () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 100; canvas.height = 100;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, 100, 100);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                        await setDoc(doc(db, "users", user.uid), { photoURL: dataUrl, ...(nickname ? { displayName: nickname } : {}) }, { merge: true });
-                        if(nickname) await updateProfile(user, { displayName: nickname });
-                        location.reload();
-                    }
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else if(nickname) {
-                await updateProfile(user, { displayName: nickname });
-                await setDoc(doc(db, "users", user.uid), { displayName: nickname }, { merge: true });
-                location.reload();
+            if (!currentUserData || !currentUserData.lastInviteCreated) {
+                cooldownText.textContent = 'Status: Ready to generate your first invite code!';
+                genBtn.style.opacity = '1';
+                genBtn.style.pointerEvents = 'auto';
+                return;
+            }
+
+            const lastDate = new Date(currentUserData.lastInviteCreated);
+            const now = new Date();
+            const diffDays = (now - lastDate) / (1000 * 60 * 60 * 24);
+            const daysLeft = Math.ceil(30 - diffDays);
+
+            if (diffDays < 30) {
+                cooldownText.textContent = `Status: Cooldown active. You can generate a new invite in ${daysLeft} day(s).`;
+                genBtn.style.opacity = '0.5';
+                genBtn.style.pointerEvents = 'none';
+            } else {
+                cooldownText.textContent = 'Status: Ready to generate a new invite code!';
+                genBtn.style.opacity = '1';
+                genBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        document.getElementById('generateInviteBtn').onclick = async () => {
+            const errEl = document.getElementById('profileErrorMsg');
+            const succEl = document.getElementById('profileSuccessMsg');
+            errEl.style.display = 'none'; succEl.style.display = 'none';
+
+            try {
+                const randomCode = 'skebob-' + Math.random().toString(36).substring(2, 8) + '-' + Math.random().toString(36).substring(2, 8);
+                const nowIso = new Date().toISOString();
+
+                await setDoc(doc(db, "invites", randomCode), {
+                    used: false,
+                    createdBy: currentAuthUser.uid,
+                    createdAt: nowIso
+                });
+
+                await updateDoc(doc(db, "users", currentAuthUser.uid), {
+                    lastInviteCreated: nowIso
+                });
+
+                currentUserData.lastInviteCreated = nowIso;
+                document.getElementById('generatedInviteBox').value = randomCode;
+                succEl.textContent = 'Invite code successfully generated!';
+                succEl.style.display = 'block';
+                checkInviteCooldown();
+            } catch (err) {
+                errEl.textContent = 'Failed to generate invite code.';
+                errEl.style.display = 'block';
             }
         };
 
-        document.getElementById('adminGenBtn').onclick = async () => {
-            const code = 'SKEBOB-ADMIN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            await setDoc(doc(db, "invites", code), { used: false, createdBy: auth.currentUser.uid, createdAt: Date.now() });
-            document.getElementById('adminGeneratedInviteInput').value = code;
+        document.getElementById('logoutBtn').onclick = async () => {
+            await signOut(auth);
+            location.href = 'login.html';
         };
-
-        document.getElementById('logoutBtn').onclick = async () => { await signOut(auth); location.href = 'login.html'; };
     </script>
 </body>
 </html>
