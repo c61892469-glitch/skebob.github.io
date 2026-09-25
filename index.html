@@ -12,7 +12,7 @@
         .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
         .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 40px auto; }
         .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
-        .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; }
+        .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
         .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
         .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
         .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
@@ -21,9 +21,13 @@
         .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
         .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
         .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
+        .subtabs { display: flex; gap: 6px; margin-bottom: 12px; }
+        .subtab-btn { background: #1a1a1a; border: 1px solid #000; color: #aaa; padding: 5px 10px; cursor: pointer; font-size: 10px; }
+        .subtab-btn.active { background: #2c2c2c; color: var(--accent-green); border-color: var(--accent-green); font-weight: bold; }
+        .cfg-grid { display: flex; flex-direction: column; gap: 8px; }
+        .cfg-item { background: #1a1a1a; border: 1px solid #000000; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
         .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
         .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
-        .f-error-msg { display: none; background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -39,19 +43,76 @@
             </div>
         </div>
 
-        <div class="f-box">
-            <div class="f-header">Information & Downloads</div>
+        <div id="indexLoggedOut" style="display: none;" class="f-box">
+            <div class="f-header">Access Denied</div>
             <div class="f-content">
-                <div id="indexLoggedOut" style="display: none;">
-                    <div class="f-text" style="color: #cccccc; margin-bottom: 8px;">You do not have permission to view these forums.</div>
-                    <a href="login.html" style="color: var(--legend-blue); text-decoration: none;">Sign in to continue</a>
-                </div>
-                <div id="indexLoggedIn" style="display: none;">
+                <div class="f-text" style="color: #cccccc; margin-bottom: 8px;">You do not have permission to view configs and scripts.</div>
+                <a href="login.html" style="color: var(--legend-blue); text-decoration: none;">Sign in to continue</a>
+            </div>
+        </div>
+
+        <div id="indexLoggedIn" style="display: none;">
+            <!-- Loader & Scripts -->
+            <div class="f-box">
+                <div class="f-header">Loader & Downloads</div>
+                <div class="f-content">
                     <fieldset class="f-fieldset">
-                        <legend class="f-legend">skebob.vip Loader & Scripts</legend>
-                        <div class="f-text" style="margin-bottom: 10px;">Welcome to skebob.vip. Download your scripts and configs below.</div>
+                        <legend class="f-legend">skebob.vip Main Script</legend>
+                        <div class="f-text" style="margin-bottom: 10px;">Download your script below.</div>
                         <a href="#" id="downloadBtn" class="f-btn">Download LUA Script</a>
                     </fieldset>
+                </div>
+            </div>
+
+            <!-- Configs & Lua Tabs (Neverlose / GameSense) -->
+            <div class="subtabs">
+                <button class="subtab-btn active" onclick="switchTab('neverlose')">Neverlose Configs & Lua</button>
+                <button class="subtab-btn" onclick="switchTab('gamesense')">GameSense Configs & Lua</button>
+            </div>
+
+            <!-- NEVERLOSE SECTION -->
+            <div id="tabNeverlose" class="f-box">
+                <div class="f-header"><span>Neverlose - Configs & Lua</span><span style="color:var(--accent-green);">Cyberpunk Edition</span></div>
+                <div class="f-content">
+                    <div class="cfg-grid">
+                        <div class="cfg-item">
+                            <div>
+                                <div style="font-weight:bold; color:#fff;">Neverlose Ultimate Visual & Rage CFG</div>
+                                <div style="color:#777; font-size:9px; margin-top:2px;">Includes custom Lua settings and cyberpunk visual themes.</div>
+                            </div>
+                            <a href="#" class="f-btn" onclick="alert('Downloading Neverlose CFG...');">Download CFG</a>
+                        </div>
+                        <div class="cfg-item">
+                            <div>
+                                <div style="font-weight:bold; color:#fff;">Team Lua Script (Coming Soon)</div>
+                                <div style="color:#777; font-size:9px; margin-top:2px;">Секретная луашка, которую мы сделаем с тимой чуть позже.</div>
+                            </div>
+                            <a href="#" class="f-btn" style="opacity: 0.5; cursor: not-allowed;">In Development</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GAMESENSE SECTION -->
+            <div id="tabGamesense" class="f-box" style="display:none;">
+                <div class="f-header"><span>GameSense - Configs & Lua</span><span style="color:var(--accent-green);">V3 / V4</span></div>
+                <div class="f-content">
+                    <div class="cfg-grid">
+                        <div class="cfg-item">
+                            <div>
+                                <div style="font-weight:bold; color:#fff;">GameSense Master Resolver & Anti-Aim CFG</div>
+                                <div style="color:#777; font-size:9px; margin-top:2px;">Optimized for strict competitive matches.</div>
+                            </div>
+                            <a href="#" class="f-btn" onclick="alert('Downloading GameSense CFG...');">Download CFG</a>
+                        </div>
+                        <div class="cfg-item">
+                            <div>
+                                <div style="font-weight:bold; color:#fff;">skebob TrashTalk & Utility Lua for GS</div>
+                                <div style="color:#777; font-size:9px; margin-top:2px;">Official community script built by team members.</div>
+                            </div>
+                            <a href="#" class="f-btn" onclick="alert('Downloading GS Lua...');">Download Lua</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -60,16 +121,14 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         const app = initializeApp({ apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10", authDomain: "skebob-vip-4aa40.firebaseapp.com", projectId: "skebob-vip-4aa40", storageBucket: "skebob-vip-4aa40.firebasestorage.app", messagingSenderId: "853888273098", appId: "1:853888273098:web:d46ec3bbb556693edd4233" });
         const auth = getAuth(app);
-        const db = getFirestore(app);
 
         onAuthStateChanged(auth, async (user) => {
             const navBar = document.getElementById('navBar');
             if (user) {
-                navBar.innerHTML = `<a href="index.html" class="active">Index</a><a href="forum.html">Forums & Configs</a><a href="profile.html">User Control Panel</a>`;
+                navBar.innerHTML = `<a href="index.html" class="active">Index</a><a href="profile.html">User Control Panel</a>`;
                 document.getElementById('statusText').textContent = `Welcome back, ${user.displayName || user.email}`;
                 document.getElementById('indexLoggedIn').style.display = 'block';
                 document.getElementById('indexLoggedOut').style.display = 'none';
@@ -80,6 +139,19 @@
                 document.getElementById('indexLoggedOut').style.display = 'block';
             }
         });
+
+        window.switchTab = function(name) {
+            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+            if(name === 'neverlose') {
+                document.getElementById('tabNeverlose').style.display = 'block';
+                document.getElementById('tabGamesense').style.display = 'none';
+                event.target.classList.add('active');
+            } else {
+                document.getElementById('tabNeverlose').style.display = 'none';
+                document.getElementById('tabGamesense').style.display = 'block';
+                event.target.classList.add('active');
+            }
+        };
 
         document.getElementById('downloadBtn').onclick = async (e) => {
             e.preventDefault();
