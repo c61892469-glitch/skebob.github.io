@@ -21,9 +21,6 @@
         .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
         .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
         .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
-        .subtabs { display: flex; gap: 6px; margin-bottom: 12px; }
-        .subtab-btn { background: #1a1a1a; border: 1px solid #000; color: #aaa; padding: 5px 10px; cursor: pointer; font-size: 10px; }
-        .subtab-btn.active { background: #2c2c2c; color: var(--accent-green); border-color: var(--accent-green); font-weight: bold; }
         .cfg-grid { display: flex; flex-direction: column; gap: 8px; }
         .cfg-item { background: #1a1a1a; border: 1px solid #000000; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
         .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
@@ -46,7 +43,7 @@
         <div id="indexLoggedOut" style="display: none;" class="f-box">
             <div class="f-header">Access Denied</div>
             <div class="f-content">
-                <div class="f-text" style="color: #cccccc; margin-bottom: 8px;">You do not have permission to view configs and scripts.</div>
+                <div class="f-text" style="color: #cccccc; margin-bottom: 8px;">You do not have permission to view scripts.</div>
                 <a href="login.html" style="color: var(--legend-blue); text-decoration: none;">Sign in to continue</a>
             </div>
         </div>
@@ -54,63 +51,21 @@
         <div id="indexLoggedIn" style="display: none;">
             <!-- Loader & Scripts -->
             <div class="f-box">
-                <div class="f-header">Loader & Downloads</div>
+                <div class="f-header"><span>skebob.vip Scripts</span><span style="color:var(--accent-green);">Cyberpunk Edition</span></div>
                 <div class="f-content">
                     <fieldset class="f-fieldset">
-                        <legend class="f-legend">skebob.vip Main Script</legend>
-                        <div class="f-text" style="margin-bottom: 10px;">Download your script below.</div>
+                        <legend class="f-legend">Main Loader</legend>
+                        <div class="f-text" style="margin-bottom: 10px;">Download the official skebob script below.</div>
                         <a href="#" id="downloadBtn" class="f-btn">Download LUA Script</a>
                     </fieldset>
-                </div>
-            </div>
 
-            <!-- Configs & Lua Tabs (Neverlose / GameSense) -->
-            <div class="subtabs">
-                <button class="subtab-btn active" onclick="switchTab('neverlose')">Neverlose Configs & Lua</button>
-                <button class="subtab-btn" onclick="switchTab('gamesense')">GameSense Configs & Lua</button>
-            </div>
-
-            <!-- NEVERLOSE SECTION -->
-            <div id="tabNeverlose" class="f-box">
-                <div class="f-header"><span>Neverlose - Configs & Lua</span><span style="color:var(--accent-green);">Cyberpunk Edition</span></div>
-                <div class="f-content">
-                    <div class="cfg-grid">
-                        <div class="cfg-item">
-                            <div>
-                                <div style="font-weight:bold; color:#fff;">Neverlose Ultimate Visual & Rage CFG</div>
-                                <div style="color:#777; font-size:9px; margin-top:2px;">Includes custom Lua settings and cyberpunk visual themes.</div>
-                            </div>
-                            <a href="#" class="f-btn" onclick="alert('Downloading Neverlose CFG...');">Download CFG</a>
-                        </div>
+                    <div class="cfg-grid" style="margin-top: 12px;">
                         <div class="cfg-item">
                             <div>
                                 <div style="font-weight:bold; color:#fff;">Team Lua Script (Coming Soon)</div>
                                 <div style="color:#777; font-size:9px; margin-top:2px;">Секретная луашка, которую мы сделаем с тимой чуть позже.</div>
                             </div>
                             <a href="#" class="f-btn" style="opacity: 0.5; cursor: not-allowed;">In Development</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GAMESENSE SECTION -->
-            <div id="tabGamesense" class="f-box" style="display:none;">
-                <div class="f-header"><span>GameSense - Configs & Lua</span><span style="color:var(--accent-green);">V3 / V4</span></div>
-                <div class="f-content">
-                    <div class="cfg-grid">
-                        <div class="cfg-item">
-                            <div>
-                                <div style="font-weight:bold; color:#fff;">GameSense Master Resolver & Anti-Aim CFG</div>
-                                <div style="color:#777; font-size:9px; margin-top:2px;">Optimized for strict competitive matches.</div>
-                            </div>
-                            <a href="#" class="f-btn" onclick="alert('Downloading GameSense CFG...');">Download CFG</a>
-                        </div>
-                        <div class="cfg-item">
-                            <div>
-                                <div style="font-weight:bold; color:#fff;">skebob TrashTalk & Utility Lua for GS</div>
-                                <div style="color:#777; font-size:9px; margin-top:2px;">Official community script built by team members.</div>
-                            </div>
-                            <a href="#" class="f-btn" onclick="alert('Downloading GS Lua...');">Download Lua</a>
                         </div>
                     </div>
                 </div>
@@ -139,19 +94,6 @@
                 document.getElementById('indexLoggedOut').style.display = 'block';
             }
         });
-
-        window.switchTab = function(name) {
-            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-            if(name === 'neverlose') {
-                document.getElementById('tabNeverlose').style.display = 'block';
-                document.getElementById('tabGamesense').style.display = 'none';
-                event.target.classList.add('active');
-            } else {
-                document.getElementById('tabNeverlose').style.display = 'none';
-                document.getElementById('tabGamesense').style.display = 'block';
-                event.target.classList.add('active');
-            }
-        };
 
         document.getElementById('downloadBtn').onclick = async (e) => {
             e.preventDefault();
