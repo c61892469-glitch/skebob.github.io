@@ -184,13 +184,12 @@
                         </div>
                     </fieldset>
 
-                    <!-- НАСТОЯЩАЯ Google reCAPTCHA (Темная тема) -->
+                    <!-- НАСТОЯЩАЯ Google reCAPTCHA -->
                     <fieldset class="f-fieldset" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
                         <legend class="f-legend">Are you a human?</legend>
                         <div class="f-text">Please prove that you're a human being.</div>
                         
-                        <!-- ВСТАВЬ СЮДА СВОЙ КЛЮЧ ИЗ GOOGLE CONSOLE, ЕСЛИ СОЗДАВАЛ НОВЫЙ -->
-                        <div class="g-recaptcha" data-sitekey="6Ld4-s0tAAAAAAOjjCydX1Js9tMvKmgePy18EyU--" data-theme="dark" style="margin-top: 15px;"></div>
+                        <div class="g-recaptcha" data-sitekey="6LeT_80tAAAAANc6m12sLRne7UCH1YMM4BwbngYC" data-theme="dark" style="margin-top: 15px;"></div>
                         
                     </fieldset>
 
@@ -334,7 +333,7 @@
             } catch (error) { alert('Error: ' + error.message); }
         }
 
-        // Слушатель статуса (Без эмодзи)
+        // Слушатель статуса
         onAuthStateChanged(auth, (user) => {
             const forumNav = document.getElementById('forumNavLinks');
             const forumStatus = document.getElementById('forumStatusText');
