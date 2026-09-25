@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>skebob.vip</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
-    
-    <!-- Google reCAPTCHA Script -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
     <style>
         :root {
             --bg-deep: #0e0e0e;
@@ -23,394 +19,75 @@
             --legend-blue: #5b84a9;
             --accent-green: #8acc14; 
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
         body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; font-size: 11px; }
-        
         .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
-        
-        /* LANDING SCREEN WITH LARGE LOGO */
-        .landing-container { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            width: 100vw;
-            user-select: none;
-        }
-        
-        .landing-logo, .landing-logo span { 
-            font-size: 72px !important; 
-            font-weight: normal; 
-            letter-spacing: 2px; 
-            cursor: pointer; 
-            transition: transform 0.2s, text-shadow 0.2s;
-            text-align: center;
-            line-height: 1;
-        }
-        .landing-logo:hover {
-            transform: scale(1.03);
-            text-shadow: 0 0 35px rgba(138, 204, 20, 0.5);
-        }
+        .landing-container { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; user-select: none; }
+        .landing-logo, .landing-logo span { font-size: 72px !important; font-weight: normal; letter-spacing: 2px; cursor: pointer; transition: transform 0.2s, text-shadow 0.2s; text-align: center; line-height: 1; }
+        .landing-logo:hover { transform: scale(1.03); text-shadow: 0 0 35px rgba(138, 204, 20, 0.5); }
         .landing-logo .white { color: #ffffff !important; }
         .landing-logo .green { color: var(--accent-green) !important; }
-
-        /* COMPACT GS STYLE FORUM CONTAINER */
         .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 40px auto; display: none; }
-        
         .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
         .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; }
         .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
-        
         .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
         .f-nav a { color: var(--text-main); text-decoration: none; font-weight: normal; font-size: 10px; }
         .f-nav a:hover { color: #ffffff; text-decoration: underline; }
         .f-nav a.active { font-weight: bold; color: #ffffff; }
-        
         .f-status { color: #bbbbbb; font-size: 10px; }
-        
         .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
         .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
-        .f-label { font-weight: bold; display: block; margin-bottom: 4px; color: #cccccc; font-size: 10px; }
-        
-        .f-input { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px 6px; width: 100%; max-width: 250px; outline: none; font-size: 10px; }
-        .f-input:focus { border: 1px solid var(--legend-blue); }
-        .f-select { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px; width: 100%; max-width: 400px; outline: none; font-size: 10px; }
-        
-        .f-btn { 
-            background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); 
-            color: #cccccc; 
-            border: 1px solid #000000; 
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-            border-radius: 2px; 
-            padding: 4px 12px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 10px; 
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none;
-        }
+        .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1); border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
         .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; border-color: #333333; }
-        
         .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
-        
-        .f-error-msg {
-            display: none;
-            background: #2d1313;
-            border: 1px solid #752222;
-            color: #ff8888;
-            padding: 8px 12px;
-            font-size: 10px;
-            margin-bottom: 12px;
-            border-radius: 2px;
-        }
-
-        .f-success-msg {
-            display: none;
-            background: #132d16;
-            border: 1px solid #22752a;
-            color: #88ff9e;
-            padding: 8px 12px;
-            font-size: 10px;
-            margin-bottom: 12px;
-            border-radius: 2px;
-        }
-
-        .page-view { display: none; }
-        .page-view.active { display: block; }
-
-        .profile-card { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; background: #1a1a1a; padding: 8px; border: 1px solid #000000; }
-        .profile-avatar { width: 48px; height: 48px; border: 1px solid #000000; object-fit: cover; background: #000; }
     </style>
 </head>
 <body>
-
     <div class="top-line"></div>
-
-    <!-- 1. LANDING SCREEN -->
     <div class="landing-container" id="landingPage">
         <div class="landing-logo" onclick="openForum()">
             <span class="white">skebob</span><span class="green">.vip</span>
         </div>
     </div>
-
-    <!-- 2. FORUM SCREEN -->
     <div class="forum-wrapper" id="forumWrapper">
-        
-        <!-- Header -->
         <div class="f-box">
             <div class="f-content" style="padding: 10px 14px;">
                 <div style="font-size: 22px; cursor: pointer;" onclick="closeForum()">
                     <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
                 </div>
-                
-                <div class="f-nav" id="navBar">
-                    <a href="#" id="navIndex" onclick="switchTab('index')" class="active">Index</a>
-                    <a href="#" id="navRegister" onclick="switchTab('register')">Register</a>
-                    <a href="#" id="navLogin" onclick="switchTab('login')">Login</a>
-                </div>
-                
+                <div class="f-nav" id="navBar"></div>
                 <div class="f-status" id="statusText">You are not logged in.</div>
             </div>
         </div>
-
-        <!-- PAGE: INDEX -->
-        <div id="viewIndex" class="page-view active">
-            <!-- FOR GUESTS -->
-            <div id="indexLoggedOut" class="f-box">
-                <div class="f-header">Info</div>
-                <div class="f-content">
-                    <div class="f-text" style="color: #cccccc; margin-bottom: 8px;">You do not have permission to view these forums.</div>
-                    <a href="#" onclick="switchTab('login')" style="color: var(--legend-blue); text-decoration: none;">Go back</a>
-                </div>
-            </div>
-
-            <!-- FOR LOGGED-IN USERS -->
-            <div id="indexLoggedIn" class="f-box" style="display: none;">
-                <div class="f-header">Information</div>
-                <div class="f-content">
-                    
-                    <!-- Если почта НЕ подтверждена -->
-                    <div id="unverifiedWarning" style="display: none;">
-                        <div class="f-error-msg" style="display: block; margin-bottom: 10px;">
-                            Ваш адрес электронной почты не подтвержден! Пожалуйста, проверьте свою почту и перейдите по ссылке из письма для разблокировки доступа к скачиванию скрипта.
-                        </div>
-                        <button class="f-btn" onclick="resendVerificationEmail()">Отправить письмо повторно</button>
-                        <div class="f-success-msg" id="resendSuccess" style="margin-top: 8px;"></div>
-                    </div>
-
-                    <!-- Если почта подтверждена -->
-                    <div id="verifiedContent" style="display: none;">
-                        <fieldset class="f-fieldset">
-                            <legend class="f-legend">skebob.vip Loader & Scripts</legend>
-                            <div class="f-text" style="margin-bottom: 10px;">
-                                Welcome to skebob.vip. You can download the official lua script below.
-                            </div>
-                            <a href="#" onclick="downloadScript(event)" class="f-btn">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8acc14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                Download LUA Script
-                            </a>
-                        </fieldset>
-                    </div>
-
-                </div>
+        <div class="f-box" id="indexLoggedOut" style="display: none;">
+            <div class="f-header">Info</div>
+            <div class="f-content">
+                <div class="f-text" style="color: #cccccc; margin-bottom: 8px;">You do not have permission to view these forums.</div>
+                <a href="login.html" style="color: var(--legend-blue); text-decoration: none;">Go to Login</a>
             </div>
         </div>
-
-        <!-- PAGE: REGISTER -->
-        <div id="viewRegister" class="page-view">
-            <div class="f-box">
-                <div class="f-header">Register</div>
-                <div class="f-content">
-                    
-                    <div class="f-error-msg" id="regErrorMsg"></div>
-                    <div class="f-success-msg" id="regSuccessMsg"></div>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">Your username must be alphanumeric between 3 and 25 characters long</legend>
-                        <label class="f-label">Username</label>
-                        <input type="text" class="f-input" id="regUser">
-                    </fieldset>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">Please enter and confirm your chosen password</legend>
-                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                            <div>
-                                <label class="f-label">Password</label>
-                                <input type="password" class="f-input" id="regPass">
-                            </div>
-                            <div>
-                                <label class="f-label">Confirm password</label>
-                                <input type="password" class="f-input" id="regPassConfirm">
-                            </div>
-                        </div>
-                        <div class="f-text" style="margin-top: 6px;">Passwords must be at least 6 characters long. Passwords are case sensitive.</div>
-                    </fieldset>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">Enter a valid email address</legend>
-                        <label class="f-label">Email</label>
-                        <input type="email" class="f-input" id="regEmail">
-                    </fieldset>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">You must be invited to join this forum</legend>
-                        <label class="f-label">Invitation code</label>
-                        <input type="text" class="f-input" id="regInvite">
-                        <div class="f-text" style="color: var(--legend-blue); cursor: pointer; margin-top: 4px; display: inline-block;" onclick="showInviteInfo()">Need an invite code?</div>
-                    </fieldset>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">Set your localisation options</legend>
-                        <div class="f-text">For the forum to display times correctly you must select your local time zone. If Daylight Savings Time is in effect you should also check the option provided which will advance times by 1 hour.</div>
-                        <label class="f-label" style="margin-top:6px;">Time zone</label>
-                        <select class="f-select">
-                            <option value="-12">(UTC-12:00) International Date Line West</option>
-                            <option value="-11">(UTC-11:00) Coordinated Universal Time-11</option>
-                            <option value="-10">(UTC-10:00) Hawaii</option>
-                            <option value="-9">(UTC-09:00) Alaska</option>
-                            <option value="-8">(UTC-08:00) Pacific Time (US & Canada)</option>
-                            <option value="-7">(UTC-07:00) Mountain Time (US & Canada)</option>
-                            <option value="-6">(UTC-06:00) Central Time (US & Canada)</option>
-                            <option value="-5">(UTC-05:00) Eastern Time (US & Canada)</option>
-                            <option value="-4">(UTC-04:00) Atlantic Time (Canada)</option>
-                            <option value="-3.5">(UTC-03:30) Newfoundland</option>
-                            <option value="-3">(UTC-03:00) Buenos Aires, Georgetown</option>
-                            <option value="-2">(UTC-02:00) Coordinated Universal Time-02</option>
-                            <option value="-1">(UTC-01:00) Azores, Cape Verde Is.</option>
-                            <option value="0">(UTC+00:00) Greenwich Mean Time : Dublin, London</option>
-                            <option value="1">(UTC+01:00) Amsterdam, Berlin, Rome, Paris, Madrid</option>
-                            <option value="2">(UTC+02:00) Athens, Bucharest, Helsinki, Kyiv</option>
-                            <option value="3">(UTC+03:00) Moscow, St. Petersburg, Minsk, Istanbul</option>
-                            <option value="3.5">(UTC+03:30) Tehran</option>
-                            <option value="4">(UTC+04:00) Abu Dhabi, Muscat, Baku, Tbilisi</option>
-                            <option value="4.5">(UTC+04:30) Kabul</option>
-                            <option value="5" selected>(UTC+05:00) Pakistan, Islamabad, Karachi, Tashkent</option>
-                            <option value="5.5">(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
-                            <option value="5.75">(UTC+05:45) Kathmandu</option>
-                            <option value="6">(UTC+06:00) Almaty, Dhaka</option>
-                            <option value="6.5">(UTC+06:30) Yangon (Rangoon)</option>
-                            <option value="7">(UTC+07:00) Bangkok, Hanoi, Jakarta</option>
-                            <option value="8">(UTC+08:00) Beijing, Hong Kong, Singapore, Taipei</option>
-                            <option value="9">(UTC+09:00) Osaka, Sapporo, Tokyo, Seoul</option>
-                            <option value="9.5">(UTC+09:30) Adelaide, Darwin</option>
-                            <option value="10">(UTC+10:00) Brisbane, Canberra, Melbourne, Sydney</option>
-                            <option value="11">(UTC+11:00) Solomon Is., New Caledonia</option>
-                            <option value="12">(UTC+12:00) Auckland, Wellington, Fiji</option>
-                            <option value="13">(UTC+13:00) Nuku'alofa</option>
-                        </select>
-                        <div style="margin-top: 6px; display: flex; align-items: center; gap: 5px;">
-                            <input type="checkbox" checked>
-                            <span class="f-text" style="margin: 0; color: #ccc;">Daylight Savings Time is in effect (advance time by 1 hour).</span>
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">Set your privacy options</legend>
-                        <div class="f-text">Select whether you want your email address to be viewable to other users or not and if you want other users to be able to send you email via the forum (form email) or not.</div>
-                        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 6px;">
-                            <label style="display: flex; align-items: center; gap: 6px;">
-                                <input type="radio" name="privacy"> <span class="f-text" style="margin: 0; color: #ccc;">Display your email address to other users.</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 6px;">
-                                <input type="radio" name="privacy"> <span class="f-text" style="margin: 0; color: #ccc;">Hide your email address but allow form email.</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 6px;">
-                                <input type="radio" name="privacy" checked> <span class="f-text" style="margin: 0; color: #ccc;">Hide your email address and disallow form email.</span>
-                            </label>
-                        </div>
-                    </fieldset>
-
-                    <!-- Google reCAPTCHA v2 -->
-                    <fieldset class="f-fieldset" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
-                        <legend class="f-legend">Are you a human?</legend>
-                        <div class="f-text">Please prove that you're a human being.</div>
-                        <div class="g-recaptcha" data-sitekey="6LeT_80tAAAAANc6m12sLRne7UCH1YMM4BwbngYC" data-theme="dark" style="margin-top: 10px;"></div>
-                    </fieldset>
-
-                </div>
-                <div style="padding: 8px 18px 12px 18px;">
-                    <button class="f-btn" onclick="handleRegister()">Register</button>
-                </div>
+        <div class="f-box" id="indexLoggedIn" style="display: none;">
+            <div class="f-header">Information</div>
+            <div class="f-content">
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">skebob.vip Loader & Scripts</legend>
+                    <div class="f-text" style="margin-bottom: 10px;">Welcome to skebob.vip. You can download the official lua script below.</div>
+                    <a href="#" onclick="downloadScript(event)" class="f-btn">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8acc14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Download LUA Script
+                    </a>
+                </fieldset>
             </div>
         </div>
-
-        <!-- PAGE: LOGIN -->
-        <div id="viewLogin" class="page-view">
-            <div class="f-box">
-                <div class="f-header">Login</div>
-                <div class="f-content">
-                    
-                    <div class="f-error-msg" id="loginErrorMsg"></div>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">Account Credentials</legend>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div>
-                                <label class="f-label">Email Address</label>
-                                <input type="email" class="f-input" id="loginEmail">
-                            </div>
-                            <div>
-                                <label class="f-label">Password</label>
-                                <input type="password" class="f-input" id="loginPass">
-                            </div>
-                        </div>
-                    </fieldset>
-                    <button class="f-btn" onclick="handleLogin()">Sign In</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGE: PROFILE -->
-        <div id="viewProfile" class="page-view">
-            <div class="f-box">
-                <div class="f-header">User Control Panel</div>
-                <div class="f-content">
-                    
-                    <div class="f-error-msg" id="profileErrorMsg"></div>
-
-                    <div class="profile-card">
-                        <img id="profileAvatar" src="https://via.placeholder.com/48/000000/8acc14?text=U" class="profile-avatar" alt="Avatar">
-                        <div>
-                            <div style="font-weight: bold; color: #ffffff;" id="userDisplayTitle">User</div>
-                            <div style="color: var(--accent-green); font-size: 10px;" id="userStatusText">Status: Active Member</div>
-                        </div>
-                    </div>
-
-                    <!-- ADMIN PANEL (Скрыта, если не админ) -->
-                    <fieldset class="f-fieldset" id="adminPanelSection" style="display: none; border-color: var(--accent-green);">
-                        <legend class="f-legend" style="color: var(--accent-green);">Administrator Panel</legend>
-                        <div class="f-text">You have full administrator privileges. You can instantly generate unlimited invite codes below.</div>
-                        <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                            <button class="f-btn" onclick="handleAdminGenerateInvite()">Admin Generate Code</button>
-                            <input type="text" class="f-input" id="adminGeneratedInviteInput" readonly placeholder="Click to generate" style="width: 200px; font-weight: bold; color: var(--accent-green); text-align: center;">
-                        </div>
-                    </fieldset>
-
-                    <!-- INVITE CODE GENERATION FOR USERS -->
-                    <fieldset class="f-fieldset" id="userInviteSection">
-                        <legend class="f-legend">Invitation Codes</legend>
-                        <div class="f-text">You are eligible to generate 1 invitation code every 30 days.</div>
-                        <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                            <button class="f-btn" onclick="handleGenerateInvite()">Generate Invite Code</button>
-                            <input type="text" class="f-input" id="generatedInviteInput" readonly placeholder="No active code" style="width: 200px; font-weight: bold; color: var(--accent-green); text-align: center;">
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="f-fieldset">
-                        <legend class="f-legend">Modify Profile Settings</legend>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div>
-                                <label class="f-label">Change Username</label>
-                                <input type="text" class="f-input" id="nicknameInput" placeholder="New display name">
-                            </div>
-                            <div>
-                                <label class="f-label">Choose Avatar from Device</label>
-                                <input type="file" class="f-input" id="avatarFileInput" accept="image/*" style="max-width: 300px; padding: 3px;">
-                            </div>
-                        </div>
-                        <button class="f-btn" style="margin-top: 10px;" onclick="handleUpdateProfile()">Save Changes</button>
-                    </fieldset>
-
-                    <button class="f-btn" style="color: #ff5555;" onclick="handleLogout()">Log Out</button>
-                </div>
-            </div>
-        </div>
-
         <div class="f-box" style="margin-top: 6px;">
-            <div class="f-content" style="padding: 8px 12px; font-size: 10px; color: #888888; border: none;">
-                skebob.vip 2026
-            </div>
+            <div class="f-content" style="padding: 8px 12px; font-size: 10px; color: #888888; border: none;">skebob.vip 2026</div>
         </div>
-        
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
@@ -420,55 +97,9 @@
             messagingSenderId: "853888273098",
             appId: "1:853888273098:web:d46ec3bbb556693edd4233"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        function getFriendlyErrorMessage(error) {
-            const code = typeof error === 'string' ? error : error.code;
-            switch (code) {
-                case 'auth/email-already-in-use':
-                    return 'This email address is already registered!';
-                case 'auth/invalid-email':
-                    return 'The email address provided is invalid!';
-                case 'auth/weak-password':
-                    return 'Password is too weak. Minimum 6 characters required!';
-                case 'auth/user-not-found':
-                case 'auth/wrong-password':
-                case 'auth/invalid-credential':
-                    return 'Invalid email address or password!';
-                case 'auth/network-request-failed':
-                    return 'Network error. Please check your internet connection.';
-                default:
-                    return 'An error occurred. Please check your input and try again.';
-            }
-        }
-
-        function showError(elementId, message) {
-            const el = document.getElementById(elementId);
-            if (el) {
-                el.textContent = message;
-                el.style.display = 'block';
-            }
-        }
-
-        function showSuccess(elementId, message) {
-            const el = document.getElementById(elementId);
-            if (el) {
-                el.textContent = message;
-                el.style.display = 'block';
-            }
-        }
-
-        function clearErrors() {
-            document.querySelectorAll('.f-error-msg, .f-success-msg').forEach(el => {
-                if(el.id !== 'unverifiedWarning') {
-                    el.textContent = '';
-                    el.style.display = 'none';
-                }
-            });
-        }
 
         window.openForum = function() {
             document.getElementById('landingPage').style.display = 'none';
@@ -478,7 +109,6 @@
             document.getElementById('forumWrapper').style.display = 'none';
             document.getElementById('landingPage').style.display = 'flex';
         }
-
         window.downloadScript = async function(e) {
             if (e) e.preventDefault();
             const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua';
@@ -498,316 +128,29 @@
             }
         }
 
-        window.resendVerificationEmail = async function() {
-            const user = auth.currentUser;
-            if (user) {
-                try {
-                    await sendEmailVerification(user);
-                    showSuccess('resendSuccess', 'Письмо с подтверждением отправлено повторно!');
-                } catch (err) {
-                    showError('resendSuccess', 'Ошибка отправки. Попробуйте позже.');
-                }
-            }
-        }
-
-        window.showInviteInfo = function() {
-            showError('regErrorMsg', "Invite codes are generated exclusively by existing members or administrators.");
-        }
-
-        window.handleGenerateInvite = async function() {
-            clearErrors();
-            const user = auth.currentUser;
-            if (!user) return;
-
-            try {
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-
-                const now = Date.now();
-                const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    if (userData.role !== 'admin' && userData.lastInviteGeneratedAt) {
-                        const timePassed = now - userData.lastInviteGeneratedAt;
-                        if (timePassed < THIRTY_DAYS) {
-                            const daysLeft = Math.ceil((THIRTY_DAYS - timePassed) / (24 * 60 * 60 * 1000));
-                            showError('profileErrorMsg', `You can generate another invite code in ${daysLeft} day(s).`);
-                            return;
-                        }
-                    }
-                }
-
-                const randomCode = 'SKEBOB-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-                await setDoc(doc(db, "invites", randomCode), {
-                    used: false,
-                    createdBy: user.uid,
-                    createdAt: now
-                });
-
-                await setDoc(userRef, {
-                    lastInviteGeneratedAt: now
-                }, { merge: true });
-
-                document.getElementById('generatedInviteInput').value = randomCode;
-
-            } catch (error) {
-                showError('profileErrorMsg', 'Failed to generate invite code. Please try again later.');
-            }
-        }
-
-        window.handleAdminGenerateInvite = async function() {
-            clearErrors();
-            const user = auth.currentUser;
-            if (!user) return;
-
-            try {
-                const randomCode = 'SKEBOB-ADMIN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-                await setDoc(doc(db, "invites", randomCode), {
-                    used: false,
-                    createdBy: user.uid,
-                    createdAt: Date.now()
-                });
-                document.getElementById('adminGeneratedInviteInput').value = randomCode;
-            } catch (err) {
-                showError('profileErrorMsg', 'Failed to generate admin invite code.');
-            }
-        }
-
-        window.switchTab = function(tabName) {
-            clearErrors();
-            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.f-nav a').forEach(el => el.classList.remove('active'));
-            
-            if (tabName === 'index') {
-                document.getElementById('viewIndex').classList.add('active');
-                document.getElementById('navIndex').classList.add('active');
-            } else if (tabName === 'register') {
-                document.getElementById('viewRegister').classList.add('active');
-                document.getElementById('navRegister').classList.add('active');
-            } else if (tabName === 'login') {
-                document.getElementById('viewLogin').classList.add('active');
-                document.getElementById('navLogin').classList.add('active');
-            } else if (tabName === 'profile') {
-                document.getElementById('viewProfile').classList.add('active');
-                if (document.getElementById('navProfile')) {
-                    document.getElementById('navProfile').classList.add('active');
-                }
-            }
-        }
-
-        window.handleRegister = async function() {
-            clearErrors();
-            const user = document.getElementById('regUser').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const pass = document.getElementById('regPass').value.trim();
-            const passConfirm = document.getElementById('regPassConfirm').value.trim();
-            const code = document.getElementById('regInvite').value.trim();
-            
-            if (typeof grecaptcha !== 'undefined') {
-                const recaptchaResponse = grecaptcha.getResponse();
-                if (recaptchaResponse.length === 0) { 
-                    showError('regErrorMsg', 'Please complete the "Are you a human?" reCAPTCHA verification.'); 
-                    return; 
-                }
-            }
-
-            if (!email || !pass || !code) { 
-                showError('regErrorMsg', 'Please fill in all required fields!'); 
-                return; 
-            }
-            if (pass !== passConfirm) { 
-                showError('regErrorMsg', 'Entered passwords do not match!'); 
-                return; 
-            }
-
-            try {
-                const inviteRef = doc(db, "invites", code);
-                const inviteSnap = await getDoc(inviteRef);
-                if (!inviteSnap.exists() || inviteSnap.data().used) { 
-                    showError('regErrorMsg', 'Invalid or already redeemed invitation code!'); 
-                    return; 
-                }
-                
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                const userObj = userCredential.user;
-
-                await sendEmailVerification(userObj);
-                await updateDoc(inviteRef, { used: true });
-                
-                if (user) {
-                    await updateProfile(userObj, { displayName: user });
-                    await setDoc(doc(db, "users", userObj.uid), { displayName: user }, { merge: true });
-                }
-                
-                showSuccess('regSuccessMsg', 'Registration successful! A verification link has been sent to your email.');
-            } catch (error) { 
-                showError('regErrorMsg', getFriendlyErrorMessage(error)); 
-            }
-        }
-
-        window.handleLogin = async function() {
-            clearErrors();
-            const email = document.getElementById('loginEmail').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-            if (!email || !pass) {
-                showError('loginErrorMsg', 'Please enter both your email address and password!');
-                return;
-            }
-            
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                switchTab('index');
-            } catch (error) { 
-                showError('loginErrorMsg', getFriendlyErrorMessage(error)); 
-            }
-        }
-
-        window.handleLogout = async function() { 
-            await signOut(auth); 
-            switchTab('index'); 
-        }
-
-        window.handleUpdateProfile = async function() {
-            clearErrors();
-            const fileInput = document.getElementById('avatarFileInput');
-            const nickname = document.getElementById('nicknameInput').value.trim();
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const updateData = {};
-            if (nickname) updateData.displayName = nickname;
-
-            if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = async function() {
-                        const canvas = document.createElement('canvas');
-                        const MAX_SIZE = 100;
-                        let width = img.width;
-                        let height = img.height;
-                        if (width > height) {
-                            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-                        } else {
-                            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                        try {
-                            await setDoc(doc(db, "users", user.uid), {
-                                photoURL: dataUrl,
-                                ...(nickname ? { displayName: nickname } : {})
-                            }, { merge: true });
-
-                            if (nickname) {
-                                await updateProfile(user, { displayName: nickname });
-                                document.getElementById('userDisplayTitle').textContent = nickname;
-                            }
-
-                            document.getElementById('profileAvatar').src = dataUrl;
-                            fileInput.value = '';
-                            document.getElementById('nicknameInput').value = '';
-                        } catch (err) {
-                            showError('profileErrorMsg', 'Failed to save avatar to database.');
-                        }
-                    }
-                }
-                reader.readAsDataURL(file);
-            } else {
-                if (Object.keys(updateData).length === 0) return;
-                try {
-                    if (nickname) {
-                        await updateProfile(user, { displayName: nickname });
-                        await setDoc(doc(db, "users", user.uid), { displayName: nickname }, { merge: true });
-                        document.getElementById('userDisplayTitle').textContent = nickname;
-                    }
-                    document.getElementById('nicknameInput').value = '';
-                } catch (error) { 
-                    showError('profileErrorMsg', 'Failed to update profile settings.');
-                }
-            }
-        }
-
         onAuthStateChanged(auth, async (user) => {
             const navBar = document.getElementById('navBar');
             const statusText = document.getElementById('statusText');
             const indexLoggedOut = document.getElementById('indexLoggedOut');
             const indexLoggedIn = document.getElementById('indexLoggedIn');
             
-            const unverifiedWarning = document.getElementById('unverifiedWarning');
-            const verifiedContent = document.getElementById('verifiedContent');
-            
-            const adminPanelSection = document.getElementById('adminPanelSection');
-            const userStatusText = document.getElementById('userStatusText');
-            
             if (user) {
                 navBar.innerHTML = `
-                    <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
-                    <a href="#" id="navProfile" onclick="switchTab('profile')">User Control Panel</a>
+                    <a href="index.html" class="active">Index</a>
+                    <a href="profile.html">User Control Panel</a>
                 `;
                 statusText.textContent = `Welcome back, ${user.displayName ? user.displayName : user.email}`;
-                
-                document.getElementById('userDisplayTitle').textContent = user.displayName ? user.displayName : user.email;
-                
-                try {
-                    const userDocSnap = await getDoc(doc(db, "users", user.uid));
-                    if (userDocSnap.exists()) {
-                        const data = userDocSnap.data();
-                        if (data.photoURL) {
-                            document.getElementById('profileAvatar').src = data.photoURL;
-                        } else {
-                            document.getElementById('profileAvatar').src = "https://via.placeholder.com/48/000000/8acc14?text=U";
-                        }
-
-                        if (data.role === 'admin') {
-                            adminPanelSection.style.display = 'block';
-                            userStatusText.textContent = "Status: Administrator";
-                            userStatusText.style.color = "#8acc14";
-                        } else {
-                            adminPanelSection.style.display = 'none';
-                            userStatusText.textContent = "Status: Active Member";
-                        }
-                    }
-                } catch (e) {
-                    document.getElementById('profileAvatar').src = "https://via.placeholder.com/48/000000/8acc14?text=U";
-                }
-
                 indexLoggedOut.style.display = 'none';
                 indexLoggedIn.style.display = 'block';
-
-                if (user.emailVerified) {
-                    unverifiedWarning.style.display = 'none';
-                    verifiedContent.style.display = 'block';
-                } else {
-                    unverifiedWarning.style.display = 'block';
-                    verifiedContent.style.display = 'none';
-                }
-                
-                switchTab('index');
             } else {
                 navBar.innerHTML = `
-                    <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
-                    <a href="#" id="navRegister" onclick="switchTab('register')">Register</a>
-                    <a href="#" id="navLogin" onclick="switchTab('login')">Login</a>
+                    <a href="index.html" class="active">Index</a>
+                    <a href="register.html">Register</a>
+                    <a href="login.html">Login</a>
                 `;
                 statusText.textContent = `You are not logged in.`;
-                
                 indexLoggedIn.style.display = 'none';
                 indexLoggedOut.style.display = 'block';
-                
-                if (typeof grecaptcha !== 'undefined') {
-                    try { grecaptcha.reset(); } catch(e) {}
-                }
-                
-                switchTab('register'); 
             }
         });
     </script>
