@@ -14,7 +14,8 @@
         .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
         .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; }
         .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
-        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; justify-content: space-between; align-items: center; }
+        .f-nav-links { display: flex; gap: 12px; }
         .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
         .f-nav a:hover, .f-nav a.active { color: #ffffff; text-decoration: underline; font-weight: bold; }
         .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
@@ -25,7 +26,7 @@
         .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
         .profile-card { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; background: #1a1a1a; padding: 8px; border: 1px solid #000000; }
         .profile-avatar { width: 48px; height: 48px; border: 1px solid #000000; object-fit: cover; background: #000; }
-        .f-error-msg { display: none; background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; }
+        .sub-item { background: #1a1a1a; border: 1px solid #000; padding: 6px 10px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -37,9 +38,12 @@
                     <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
                 </div>
                 <div class="f-nav">
-                    <a href="index.html">Index</a>
-                    <a href="forum.html">Forums & Configs</a>
-                    <a href="profile.html" class="active">User Control Panel</a>
+                    <div class="f-nav-links">
+                        <a href="index.html">Index</a>
+                        <a href="forum.html">Forums & Configs</a>
+                        <a href="profile.html" class="active">User Control Panel</a>
+                    </div>
+                    <div><a href="rules.html" style="color: var(--accent-green);">Rules</a></div>
                 </div>
             </div>
         </div>
@@ -47,7 +51,6 @@
         <div class="f-box">
             <div class="f-header">User Control Panel</div>
             <div class="f-content">
-                <div class="f-error-msg" id="profileErrorMsg"></div>
                 <div class="profile-card">
                     <img id="profileAvatar" src="https://via.placeholder.com/48/000000/8acc14?text=U" class="profile-avatar">
                     <div>
@@ -56,21 +59,29 @@
                     </div>
                 </div>
 
+                <!-- ПАНЕЛЬ АДМИНА ДЛЯ ОДОБРЕНИЯ ЗАЯВОк -->
                 <fieldset class="f-fieldset" id="adminPanelSection" style="display: none; border-color: var(--accent-green);">
-                    <legend class="f-legend" style="color: var(--accent-green);">Administrator Panel</legend>
-                    <button class="f-btn" id="adminGenBtn">Admin Generate Code</button>
-                    <input type="text" class="f-input" id="adminGeneratedInviteInput" readonly placeholder="Click to generate" style="margin-top: 5px;">
+                    <legend class="f-legend" style="color: var(--accent-green);">Модерация заявок на конфиги</legend>
+                    <div id="adminSubmissionsList" style="margin-bottom: 10px;">Загрузка заявок...</div>
+                    <button class="f-btn" id="adminGenBtn">Сгенерировать инвайт-код</button>
+                    <input type="text" class="f-input" id="adminGeneratedInviteInput" readonly placeholder="Кликни для создания" style="margin-top: 5px;">
+                </fieldset>
+
+                <!-- МОИ ЗАЯВКИ -->
+                <fieldset class="f-fieldset">
+                    <legend class="f-legend">История моих заявок на форум</legend>
+                    <div id="mySubmissionsList">Загрузка...</div>
                 </fieldset>
 
                 <fieldset class="f-fieldset">
-                    <legend class="f-legend">Modify Profile Settings</legend>
+                    <legend class="f-legend">Настройки профиля</legend>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <div><label class="f-label">Change Username</label><input type="text" class="f-input" id="nicknameInput"></div>
-                        <div><label class="f-label">Avatar from Device</label><input type="file" class="f-input" id="avatarFileInput" accept="image/*"></div>
+                        <div><label class="f-label">Новый никнейм</label><input type="text" class="f-input" id="nicknameInput"></div>
+                        <div><label class="f-label">Аватарка с ПК</label><input type="file" class="f-input" id="avatarFileInput" accept="image/*"></div>
                     </div>
-                    <button class="f-btn" style="margin-top: 10px;" id="saveProfileBtn">Save Changes</button>
+                    <button class="f-btn" style="margin-top: 10px;" id="saveProfileBtn">Сохранить изменения</button>
                 </fieldset>
-                <button class="f-btn" style="color: #ff5555;" id="logoutBtn">Log Out</button>
+                <button class="f-btn" style="color: #ff5555;" id="logoutBtn">Выйти из аккаунта</button>
             </div>
         </div>
     </div>
@@ -78,7 +89,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         const app = initializeApp({ apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10", authDomain: "skebob-vip-4aa40.firebaseapp.com", projectId: "skebob-vip-4aa40", storageBucket: "skebob-vip-4aa40.firebasestorage.app", messagingSenderId: "853888273098", appId: "1:853888273098:web:d46ec3bbb556693edd4233" });
         const auth = getAuth(app);
@@ -95,9 +106,54 @@
                 if(data.role === 'admin') {
                     document.getElementById('adminPanelSection').style.display = 'block';
                     document.getElementById('userStatusText').textContent = "Status: Administrator";
+                    loadAdminSubmissions();
                 }
             }
+            loadMySubmissions(user.uid);
         });
+
+        async function loadMySubmissions(uid) {
+            const q = query(collection(db, "submissions"), where("uid", "==", uid));
+            const snap = await getDocs(q);
+            let html = '';
+            snap.forEach(d => {
+                const data = d.data();
+                let statusColor = '#aaa';
+                let statusText = 'На проверке';
+                if(data.status === 'approved') { statusColor = '#88ff9e'; statusText = 'Одобрено'; }
+                if(data.status === 'rejected') { statusColor = '#ff8888'; statusText = 'Отклонено (нет скринов/описания)'; }
+                
+                html += `<div class="sub-item"><div><b>${data.title}</b> (${data.software})</div><div style="color:${statusColor};">${statusText}</div></div>`;
+            });
+            document.getElementById('mySubmissionsList').innerHTML = html || 'Ты пока ничего не заливал.';
+        }
+
+        async function loadAdminSubmissions() {
+            const q = query(collection(db, "submissions"), where("status", "==", "pending"));
+            const snap = await getDocs(q);
+            let html = '';
+            snap.forEach(d => {
+                const data = d.data();
+                html += `
+                    <div class="sub-item" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                        <div><b>${data.title}</b> от ${data.author} (${data.software})</div>
+                        <div style="color:#aaa;">Описание: ${data.desc}</div>
+                        <div><a href="${data.link}" target="_blank" style="color:var(--legend-blue);">Ссылка на файл</a></div>
+                        <div style="display:flex; gap:6px; margin-top:4px;">
+                            <button class="f-btn" style="background:#132d16; color:#88ff9e;" onclick="reviewSub('${d.id}', 'approved')">Одобрить</button>
+                            <button class="f-btn" style="background:#2d1313; color:#ff8888;" onclick="reviewSub('${d.id}', 'rejected')">Отклонить</button>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('adminSubmissionsList').innerHTML = html || 'Нет новых заявок.';
+        }
+
+        window.reviewSub = async function(id, status) {
+            await updateDoc(doc(db, "submissions", id), { status });
+            alert('Статус изменен!');
+            location.reload();
+        }
 
         document.getElementById('saveProfileBtn').onclick = async () => {
             const user = auth.currentUser;
