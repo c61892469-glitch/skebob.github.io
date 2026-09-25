@@ -56,7 +56,7 @@
         /* Олдскульные инпуты */
         .f-input { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px 6px; width: 100%; max-width: 260px; outline: none; }
         .f-input:focus { border: 1px solid var(--legend-blue); }
-        .f-select { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px; width: 100%; max-width: 380px; outline: none; }
+        .f-select { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px; width: 100%; max-width: 420px; outline: none; }
         
         /* Кнопки GS */
         .f-btn { 
@@ -131,7 +131,7 @@
                         <div class="f-text" style="margin-bottom: 12px;">
                             Welcome to skebob.vip. You can download the official lua script below.
                         </div>
-                        <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="f-btn">
+                        <a href="#" onclick="downloadScript(event)" class="f-btn">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8acc14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             Download LUA Script
                         </a>
@@ -185,7 +185,39 @@
                         <div class="f-text">For the forum to display times correctly you must select your local time zone. If Daylight Savings Time is in effect you should also check the option provided which will advance times by 1 hour.</div>
                         <label class="f-label" style="margin-top:8px;">Time zone</label>
                         <select class="f-select">
-                            <option>(UTC+05:00) Pakistan</option>
+                            <option value="-12">(UTC-12:00) International Date Line West</option>
+                            <option value="-11">(UTC-11:00) Coordinated Universal Time-11</option>
+                            <option value="-10">(UTC-10:00) Hawaii</option>
+                            <option value="-9">(UTC-09:00) Alaska</option>
+                            <option value="-8">(UTC-08:00) Pacific Time (US & Canada)</option>
+                            <option value="-7">(UTC-07:00) Mountain Time (US & Canada)</option>
+                            <option value="-6">(UTC-06:00) Central Time (US & Canada)</option>
+                            <option value="-5">(UTC-05:00) Eastern Time (US & Canada)</option>
+                            <option value="-4">(UTC-04:00) Atlantic Time (Canada)</option>
+                            <option value="-3.5">(UTC-03:30) Newfoundland</option>
+                            <option value="-3">(UTC-03:00) Buenos Aires, Georgetown</option>
+                            <option value="-2">(UTC-02:00) Coordinated Universal Time-02</option>
+                            <option value="-1">(UTC-01:00) Azores, Cape Verde Is.</option>
+                            <option value="0">(UTC+00:00) Greenwich Mean Time : Dublin, London</option>
+                            <option value="1">(UTC+01:00) Amsterdam, Berlin, Rome, Paris, Madrid</option>
+                            <option value="2">(UTC+02:00) Athens, Bucharest, Helsinki, Kyiv</option>
+                            <option value="3">(UTC+03:00) Moscow, St. Petersburg, Minsk, Istanbul</option>
+                            <option value="3.5">(UTC+03:30) Tehran</option>
+                            <option value="4">(UTC+04:00) Abu Dhabi, Muscat, Baku, Tbilisi</option>
+                            <option value="4.5">(UTC+04:30) Kabul</option>
+                            <option value="5" selected>(UTC+05:00) Pakistan, Islamabad, Karachi, Tashkent</option>
+                            <option value="5.5">(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
+                            <option value="5.75">(UTC+05:45) Kathmandu</option>
+                            <option value="6">(UTC+06:00) Almaty, Dhaka</option>
+                            <option value="6.5">(UTC+06:30) Yangon (Rangoon)</option>
+                            <option value="7">(UTC+07:00) Bangkok, Hanoi, Jakarta</option>
+                            <option value="8">(UTC+08:00) Beijing, Hong Kong, Singapore, Taipei</option>
+                            <option value="9">(UTC+09:00) Osaka, Sapporo, Tokyo, Seoul</option>
+                            <option value="9.5">(UTC+09:30) Adelaide, Darwin</option>
+                            <option value="10">(UTC+10:00) Brisbane, Canberra, Melbourne, Sydney</option>
+                            <option value="11">(UTC+11:00) Solomon Is., New Caledonia</option>
+                            <option value="12">(UTC+12:00) Auckland, Wellington, Fiji</option>
+                            <option value="13">(UTC+13:00) Nuku'alofa</option>
                         </select>
                         <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px;">
                             <input type="checkbox" checked>
@@ -308,7 +340,27 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Функция при нажатии на "Need an invite code?"
+        // Принудительное скачивание через Blob (решает проблему блокировки браузеров)
+        window.downloadScript = async function(e) {
+            if (e) e.preventDefault();
+            const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua';
+            try {
+                const response = await fetch(fileUrl);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'skebob_trashtalk.lua';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                window.open(fileUrl, '_blank');
+            }
+        }
+
+        // Инструкция по инвайтам
         window.showInviteInfo = function() {
             alert("Invite codes are generated exclusively by existing members or administrators. Contact a community manager to receive an invite code.");
         }
@@ -343,7 +395,6 @@
             const passConfirm = document.getElementById('regPassConfirm').value.trim();
             const code = document.getElementById('regInvite').value.trim();
             
-            // Проверка Google reCAPTCHA
             if (typeof grecaptcha !== 'undefined') {
                 const recaptchaResponse = grecaptcha.getResponse();
                 if (recaptchaResponse.length === 0) { 
@@ -424,7 +475,6 @@
             const indexLoggedIn = document.getElementById('indexLoggedIn');
             
             if (user) {
-                // Если юзер вошел
                 navBar.innerHTML = `
                     <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
                     <a href="#" id="navProfile" onclick="switchTab('profile')">User Control Panel</a>
@@ -434,13 +484,11 @@
                 document.getElementById('userDisplayTitle').textContent = user.displayName ? user.displayName : user.email;
                 document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/54/000000/8acc14?text=U";
                 
-                // Показываем контент на Index
                 indexLoggedOut.style.display = 'none';
                 indexLoggedIn.style.display = 'block';
                 
                 switchTab('index');
             } else {
-                // Если незарегистрирован
                 navBar.innerHTML = `
                     <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
                     <a href="#" id="navRegister" onclick="switchTab('register')">Register</a>
@@ -448,7 +496,6 @@
                 `;
                 statusText.textContent = `You are not logged in.`;
                 
-                // Скрываем контент на Index и выводим ошибку
                 indexLoggedIn.style.display = 'none';
                 indexLoggedOut.style.display = 'block';
                 
@@ -456,7 +503,7 @@
                     try { grecaptcha.reset(); } catch(e) {}
                 }
                 
-                switchTab('register'); // По умолчанию сразу открываем регистрацию
+                switchTab('register'); 
             }
         });
     </script>
