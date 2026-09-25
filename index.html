@@ -184,12 +184,13 @@
                         </div>
                     </fieldset>
 
-                    <!-- НАСТОЯЩАЯ Google reCAPTCHA -->
+                    <!-- НАСТОЯЩАЯ Google reCAPTCHA (Темная тема) -->
                     <fieldset class="f-fieldset" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
                         <legend class="f-legend">Are you a human?</legend>
                         <div class="f-text">Please prove that you're a human being.</div>
                         
-                        <div class="g-recaptcha" data-sitekey="6Ld4-s0tAAAAAOjjCydX1Js9tMvKmgePy18EyU-" data-theme="dark" style="margin-top: 15px;"></div>
+                        <!-- ВСТАВЬ СЮДА СВОЙ КЛЮЧ ИЗ GOOGLE CONSOLE, ЕСЛИ СОЗДАВАЛ НОВЫЙ -->
+                        <div class="g-recaptcha" data-sitekey="6Ld4-s0tAAAAAAOjjCydX1Js9tMvKmgePy18EyU--" data-theme="dark" style="margin-top: 15px;"></div>
                         
                     </fieldset>
 
@@ -333,7 +334,7 @@
             } catch (error) { alert('Error: ' + error.message); }
         }
 
-        // Слушатель статуса
+        // Слушатель статуса (Без эмодзи)
         onAuthStateChanged(auth, (user) => {
             const forumNav = document.getElementById('forumNavLinks');
             const forumStatus = document.getElementById('forumStatusText');
@@ -341,7 +342,6 @@
             
             if (user) {
                 forumNav.innerHTML = `
-                    <span style="cursor:default">🔔</span>
                     <a href="#" onclick="closeForum()">Index</a>
                     <a href="#" onclick="openModal('dashboardOverlay')">User Panel</a>
                 `;
@@ -352,7 +352,6 @@
                 document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/64/1a1a1a/8acc14?text=U";
             } else {
                 forumNav.innerHTML = `
-                    <span style="cursor:default">🔔</span>
                     <a href="#" onclick="closeForum()">Index</a>
                     <a href="#" style="font-weight:bold;">Register</a>
                     <a href="#" onclick="openModal('loginModal')">Login</a>
