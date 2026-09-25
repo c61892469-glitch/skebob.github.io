@@ -96,12 +96,23 @@
         
         .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
         
-        /* IN-SITE ERROR MESSAGE STYLING */
+        /* IN-SITE ERROR & SUCCESS MESSAGE STYLING */
         .f-error-msg {
             display: none;
             background: #2d1313;
             border: 1px solid #752222;
             color: #ff8888;
+            padding: 8px 12px;
+            font-size: 10px;
+            margin-bottom: 12px;
+            border-radius: 2px;
+        }
+
+        .f-success-msg {
+            display: none;
+            background: #132d16;
+            border: 1px solid #22752a;
+            color: #88ff9e;
             padding: 8px 12px;
             font-size: 10px;
             margin-bottom: 12px;
@@ -119,7 +130,7 @@
 
     <div class="top-line"></div>
 
-    <!-- 1. LANDING SCREEN (LARGE LOGO) -->
+    <!-- 1. LANDING SCREEN -->
     <div class="landing-container" id="landingPage">
         <div class="landing-logo" onclick="openForum()">
             <span class="white">skebob</span><span class="green">.vip</span>
@@ -181,8 +192,8 @@
                 <div class="f-header">Register</div>
                 <div class="f-content">
                     
-                    <!-- IN-SITE ERROR CONTAINER -->
                     <div class="f-error-msg" id="regErrorMsg"></div>
+                    <div class="f-success-msg" id="regSuccessMsg"></div>
 
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Your username must be alphanumeric between 3 and 25 characters long</legend>
@@ -218,7 +229,6 @@
                         <div class="f-text" style="color: var(--legend-blue); cursor: pointer; margin-top: 4px; display: inline-block;" onclick="showInviteInfo()">Need an invite code?</div>
                     </fieldset>
 
-                    <!-- TIMEZONE SELECT -->
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Set your localisation options</legend>
                         <div class="f-text">For the forum to display times correctly you must select your local time zone. If Daylight Savings Time is in effect you should also check the option provided which will advance times by 1 hour.</div>
@@ -300,7 +310,6 @@
                 <div class="f-header">Login</div>
                 <div class="f-content">
                     
-                    <!-- IN-SITE ERROR CONTAINER -->
                     <div class="f-error-msg" id="loginErrorMsg"></div>
 
                     <fieldset class="f-fieldset">
@@ -327,7 +336,6 @@
                 <div class="f-header">User Control Panel</div>
                 <div class="f-content">
                     
-                    <!-- IN-SITE ERROR / INFO CONTAINER -->
                     <div class="f-error-msg" id="profileErrorMsg"></div>
 
                     <div class="profile-card">
@@ -378,7 +386,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -394,7 +402,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Firebase Error Translator to English
         function getFriendlyErrorMessage(error) {
             const code = typeof error === 'string' ? error : error.code;
             switch (code) {
@@ -415,7 +422,6 @@
             }
         }
 
-        // Display Error inside the page UI
         function showError(elementId, message) {
             const el = document.getElementById(elementId);
             if (el) {
@@ -424,15 +430,21 @@
             }
         }
 
-        // Clear error messages on tab switch
+        function showSuccess(elementId, message) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.textContent = message;
+                el.style.display = 'block';
+            }
+        }
+
         function clearErrors() {
-            document.querySelectorAll('.f-error-msg').forEach(el => {
+            document.querySelectorAll('.f-error-msg, .f-success-msg').forEach(el => {
                 el.textContent = '';
                 el.style.display = 'none';
             });
         }
 
-        // Toggle Landing vs Forum
         window.openForum = function() {
             document.getElementById('landingPage').style.display = 'none';
             document.getElementById('forumWrapper').style.display = 'block';
@@ -442,7 +454,6 @@
             document.getElementById('landingPage').style.display = 'flex';
         }
 
-        // Blob File Download
         window.downloadScript = async function(e) {
             if (e) e.preventDefault();
             const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua';
@@ -466,7 +477,6 @@
             showError('regErrorMsg', "Invite codes are generated exclusively by existing members or administrators.");
         }
 
-        // Invite Generation Logic (1 per 30 days)
         window.handleGenerateInvite = async function() {
             clearErrors();
             const user = auth.currentUser;
@@ -565,14 +575,19 @@
                     return; 
                 }
                 
-                await createUserWithEmailAndPassword(auth, email, pass);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const userObj = userCredential.user;
+
+                // Отправляем письмо с подтверждением
+                await sendEmailVerification(userObj);
+
                 await updateDoc(inviteRef, { used: true });
                 
                 if (user) {
-                    await updateProfile(auth.currentUser, { displayName: user });
+                    await updateProfile(userObj, { displayName: user });
                 }
                 
-                switchTab('index');
+                showSuccess('regSuccessMsg', 'Registration successful! A verification link has been sent to your email.');
             } catch (error) { 
                 showError('regErrorMsg', getFriendlyErrorMessage(error)); 
             }
