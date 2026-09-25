@@ -39,7 +39,6 @@
             user-select: none;
         }
         
-        /* Принудительный крупный размер для самого логотипа и его span-элементов */
         .landing-logo, .landing-logo span { 
             font-size: 72px !important; 
             font-weight: normal; 
@@ -373,6 +372,26 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Функция переводчик ошибок Firebase в понятный вид
+        function getFriendlyErrorMessage(error) {
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    return 'Эта почта уже зарегистрирована!';
+                case 'auth/invalid-email':
+                    return 'Некорректный адрес электронной почты!';
+                case 'auth/weak-password':
+                    return 'Пароль слишком слабый (минимум 6 символов)!';
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    return 'Неверная почта или пароль!';
+                case 'auth/network-request-failed':
+                    return 'Ошибка сети. Проверьте подключение к интернету.';
+                default:
+                    return 'Неудачный запрос. Проверьте введенные данные.';
+            }
+        }
+
         // Переключение с Лендинга на Форум
         window.openForum = function() {
             document.getElementById('landingPage').style.display = 'none';
@@ -447,7 +466,7 @@
                 alert(`Invite code created: ${randomCode}`);
 
             } catch (error) {
-                alert('Error generating invite: ' + error.message);
+                alert(getFriendlyErrorMessage(error));
             }
         }
 
@@ -482,19 +501,19 @@
             if (typeof grecaptcha !== 'undefined') {
                 const recaptchaResponse = grecaptcha.getResponse();
                 if (recaptchaResponse.length === 0) { 
-                    alert('Please complete the "Are you a human?" check.'); 
+                    alert('Пожалуйста, пройдите проверку "Are you a human?".'); 
                     return; 
                 }
             }
 
-            if (!email || !pass || !code) { alert('Please fill in all required fields!'); return; }
-            if (pass !== passConfirm) { alert('Passwords do not match!'); return; }
+            if (!email || !pass || !code) { alert('Заполните все необходимые поля!'); return; }
+            if (pass !== passConfirm) { alert('Пароли не совпадают!'); return; }
 
             try {
                 const inviteRef = doc(db, "invites", code);
                 const inviteSnap = await getDoc(inviteRef);
                 if (!inviteSnap.exists() || inviteSnap.data().used) { 
-                    alert('Invalid or already used invite code!'); 
+                    alert('Неверный или уже использованный инвайт-код!'); 
                     return; 
                 }
                 
@@ -507,20 +526,23 @@
                 
                 switchTab('index');
             } catch (error) { 
-                alert('Error: ' + error.message); 
+                alert(getFriendlyErrorMessage(error)); 
             }
         }
 
         window.handleLogin = async function() {
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
-            if (!email || !pass) return;
+            if (!email || !pass) {
+                alert('Введите почту и пароль!');
+                return;
+            }
             
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
                 switchTab('index');
             } catch (error) { 
-                alert('Error: ' + error.message); 
+                alert(getFriendlyErrorMessage(error)); 
             }
         }
 
@@ -543,9 +565,9 @@
                 if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
                 document.getElementById('avatarUrlInput').value = '';
                 document.getElementById('nicknameInput').value = '';
-                alert('Profile updated successfully!');
+                alert('Профиль успешно обновлен!');
             } catch (error) { 
-                alert('Error: ' + error.message); 
+                alert(getFriendlyErrorMessage(error)); 
             }
         }
 
