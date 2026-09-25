@@ -48,7 +48,7 @@
         
         .f-status { color: #bbbbbb; font-size: 11px; margin-top: 2px; }
         
-        /* Старенькие олдскул фреймы */
+        /* Олдскул фреймы */
         .f-fieldset { border: 1px solid var(--border-light); padding: 12px 15px; margin-bottom: 15px; border-radius: 2px; }
         .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 11px; margin-left: 5px; }
         .f-label { font-weight: bold; display: block; margin-bottom: 4px; color: #cccccc; font-size: 11px; }
@@ -58,7 +58,7 @@
         .f-input:focus { border: 1px solid var(--legend-blue); }
         .f-select { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px; width: 100%; max-width: 380px; outline: none; }
         
-        /* Олдскульные кнопочки GS */
+        /* Кнопки GS */
         .f-btn { 
             background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); 
             color: #cccccc; 
@@ -111,15 +111,25 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА: INDEX / МЕНЮ СКАЧИВАНИЯ -->
+        <!-- СТРАНИЦА: INDEX -->
         <div id="viewIndex" class="page-view active">
-            <div class="f-box">
+            <!-- ДЛЯ НЕАВТОРИЗОВАННЫХ (ОШИБКА ДОСТУПА) -->
+            <div id="indexLoggedOut" class="f-box">
+                <div class="f-header">Info</div>
+                <div class="f-content">
+                    <div class="f-text" style="color: #cccccc; margin-bottom: 10px;">You do not have permission to view these forums.</div>
+                    <a href="#" onclick="switchTab('login')" style="color: var(--legend-blue); text-decoration: none; font-size: 11px;">Go back</a>
+                </div>
+            </div>
+
+            <!-- ДЛЯ АВТОРИЗОВАННЫХ (МЕНЮ СКАЧИВАНИЯ) -->
+            <div id="indexLoggedIn" class="f-box" style="display: none;">
                 <div class="f-header">Information</div>
                 <div class="f-content">
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">skebob.vip Loader & Scripts</legend>
                         <div class="f-text" style="margin-bottom: 12px;">
-                            Welcome to skebob.vip. You can download the official lua script below or proceed to registration to gain access to account options.
+                            Welcome to skebob.vip. You can download the official lua script below.
                         </div>
                         <a href="https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua" download="skebob_trashtalk.lua" class="f-btn">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8acc14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -130,7 +140,7 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА: РЕГИСТРАЦИЯ (Скрины GS) -->
+        <!-- СТРАНИЦА: РЕГИСТРАЦИЯ -->
         <div id="viewRegister" class="page-view">
             <div class="f-box">
                 <div class="f-header">Register</div>
@@ -167,7 +177,7 @@
                         <legend class="f-legend">You must be invited to join this forum</legend>
                         <label class="f-label">Invitation code</label>
                         <input type="text" class="f-input" id="regInvite">
-                        <div class="f-text" style="color: var(--legend-blue); cursor: pointer; margin-top: 4px;">Need an invite code?</div>
+                        <div class="f-text" style="color: var(--legend-blue); cursor: pointer; margin-top: 4px; display: inline-block;" onclick="showInviteInfo()">Need an invite code?</div>
                     </fieldset>
 
                     <fieldset class="f-fieldset">
@@ -298,6 +308,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Функция при нажатии на "Need an invite code?"
+        window.showInviteInfo = function() {
+            alert("Invite codes are generated exclusively by existing members or administrators. Contact a community manager to receive an invite code.");
+        }
+
         // Переключение между вкладками
         window.switchTab = function(tabName) {
             document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
@@ -405,8 +420,11 @@
         onAuthStateChanged(auth, (user) => {
             const navBar = document.getElementById('navBar');
             const statusText = document.getElementById('statusText');
+            const indexLoggedOut = document.getElementById('indexLoggedOut');
+            const indexLoggedIn = document.getElementById('indexLoggedIn');
             
             if (user) {
+                // Если юзер вошел
                 navBar.innerHTML = `
                     <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
                     <a href="#" id="navProfile" onclick="switchTab('profile')">User Control Panel</a>
@@ -415,7 +433,14 @@
                 
                 document.getElementById('userDisplayTitle').textContent = user.displayName ? user.displayName : user.email;
                 document.getElementById('profileAvatar').src = user.photoURL ? user.photoURL : "https://via.placeholder.com/54/000000/8acc14?text=U";
+                
+                // Показываем контент на Index
+                indexLoggedOut.style.display = 'none';
+                indexLoggedIn.style.display = 'block';
+                
+                switchTab('index');
             } else {
+                // Если незарегистрирован
                 navBar.innerHTML = `
                     <a href="#" id="navIndex" onclick="switchTab('index')">Index</a>
                     <a href="#" id="navRegister" onclick="switchTab('register')">Register</a>
@@ -423,11 +448,16 @@
                 `;
                 statusText.textContent = `You are not logged in.`;
                 
+                // Скрываем контент на Index и выводим ошибку
+                indexLoggedIn.style.display = 'none';
+                indexLoggedOut.style.display = 'block';
+                
                 if (typeof grecaptcha !== 'undefined') {
                     try { grecaptcha.reset(); } catch(e) {}
                 }
+                
+                switchTab('register'); // По умолчанию сразу открываем регистрацию
             }
-            switchTab('index');
         });
     </script>
 </body>
