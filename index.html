@@ -6,90 +6,93 @@
     <title>skebob.vip - Index</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
     <style>
-        :root {
-            --bg-deep: #0e0e0e;
-            --bg-box: #1e1e1e;
-            --bg-header: #282828;
-            --bg-nav: #252525;
-            --border-dark: #101010;
-            --border-light: #303030;
-            --text-main: #cccccc;
-            --text-muted: #888888;
-            --accent-green: #8acc14;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; font-size: 11px; }
-        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #101010 0%, var(--accent-green) 50%, #101010 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
-        .forum-wrapper { width: 95%; max-width: 920px; margin: 25px auto 40px auto; }
-        
-        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 10px; border-radius: 2px; }
-        .f-header { background: var(--bg-header); padding: 6px 10px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); }
-        .f-content { padding: 12px; border-top: 1px solid var(--border-light); line-height: 1.5; color: #bbbbbb; }
-        
-        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; margin-bottom: 8px; }
-        .f-nav-links { display: flex; gap: 10px; }
+        :root { --bg-deep: #0e0e0e; --bg-box: #222222; --bg-header: #2c2c2c; --bg-nav: #2a2a2a; --border-dark: #111111; --border-light: #333333; --text-main: #cccccc; --text-muted: #aaaaaa; --legend-blue: #5b84a9; --accent-green: #8acc14; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, Verdana, Arial, sans-serif; }
+        body { background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; font-size: 11px; }
+        .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
+        .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 40px auto; }
+        .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
+        .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; }
+        .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
         .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
         .f-nav a:hover, .f-nav a.active { color: #ffffff; text-decoration: underline; font-weight: bold; }
-
-        .status-table { width: 100%; border-collapse: collapse; }
-        .status-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-dark); }
-        .status-table tr:last-child td { border-bottom: none; }
-        .status-label { color: var(--text-muted); width: 40%; }
-        .status-value { color: #ffffff; font-weight: bold; }
-        .status-green { color: var(--accent-green); font-weight: bold; }
+        .f-status { color: #bbbbbb; font-size: 10px; }
+        .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
+        .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
+        .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
+        .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
+        .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
+        .f-error-msg { display: none; background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
     <div class="top-line"></div>
     <div class="forum-wrapper">
         <div class="f-box">
-            <div class="f-content" style="padding: 8px 12px;">
-                <div style="font-size: 20px; font-weight: bold; cursor: pointer;" onclick="location.href='index.html'">
+            <div class="f-content" style="padding: 10px 14px;">
+                <div style="font-size: 22px; cursor: pointer;" onclick="location.href='index.html'">
                     <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
                 </div>
-                <div class="f-nav">
-                    <div class="f-nav-links">
-                        <a href="index.html" class="active">Index</a>
-                        <a href="forum.html">Configs & Luas</a>
-                        <a href="profile.html">User Control Panel</a>
-                    </div>
-                    <div><a href="rules.html" style="color: var(--accent-green);">Rules</a></div>
-                </div>
+                <div class="f-nav" id="navBar"></div>
+                <div class="f-status" id="statusText">Checking session...</div>
             </div>
         </div>
 
         <div class="f-box">
-            <div class="f-header">System Information & Announcements</div>
+            <div class="f-header">Information & Downloads</div>
             <div class="f-content">
-                Welcome back to <b>skebob.vip</b>. Software build is fully updated and operational for Counter-Strike 2.
-            </div>
-        </div>
-
-        <div class="f-box">
-            <div class="f-header">Account Overview</div>
-            <div class="f-content" style="padding: 0;">
-                <table class="status-table">
-                    <tr>
-                        <td class="status-label">Subscription Status</td>
-                        <td class="status-green">Active (Lifetime)</td>
-                    </tr>
-                    <tr>
-                        <td class="status-label">Uploaded Configurations</td>
-                        <td class="status-value" id="user-cfgs-count">0</td>
-                    </tr>
-                    <tr>
-                        <td class="status-label">Software Build</td>
-                        <td class="status-value">v2.4.1 [RELEASE]</td>
-                    </tr>
-                </table>
+                <div id="indexLoggedOut" style="display: none;">
+                    <div class="f-text" style="color: #cccccc; margin-bottom: 8px;">You do not have permission to view these forums.</div>
+                    <a href="login.html" style="color: var(--legend-blue); text-decoration: none;">Sign in to continue</a>
+                </div>
+                <div id="indexLoggedIn" style="display: none;">
+                    <fieldset class="f-fieldset">
+                        <legend class="f-legend">skebob.vip Loader & Scripts</legend>
+                        <div class="f-text" style="margin-bottom: 10px;">Welcome to skebob.vip. Download your scripts and configs below.</div>
+                        <a href="#" id="downloadBtn" class="f-btn">Download LUA Script</a>
+                    </fieldset>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const stored = JSON.parse(localStorage.getItem('gs_configs') || '[]');
-        document.getElementById('user-cfgs-count').innerText = stored.length;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        
+        const app = initializeApp({ apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10", authDomain: "skebob-vip-4aa40.firebaseapp.com", projectId: "skebob-vip-4aa40", storageBucket: "skebob-vip-4aa40.firebasestorage.app", messagingSenderId: "853888273098", appId: "1:853888273098:web:d46ec3bbb556693edd4233" });
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            const navBar = document.getElementById('navBar');
+            if (user) {
+                navBar.innerHTML = `<a href="index.html" class="active">Index</a><a href="forum.html">Forums & Configs</a><a href="profile.html">User Control Panel</a>`;
+                document.getElementById('statusText').textContent = `Welcome back, ${user.displayName || user.email}`;
+                document.getElementById('indexLoggedIn').style.display = 'block';
+                document.getElementById('indexLoggedOut').style.display = 'none';
+            } else {
+                navBar.innerHTML = `<a href="index.html" class="active">Index</a><a href="register.html">Register</a><a href="login.html">Login</a>`;
+                document.getElementById('statusText').textContent = `You are not logged in.`;
+                document.getElementById('indexLoggedIn').style.display = 'none';
+                document.getElementById('indexLoggedOut').style.display = 'block';
+            }
+        });
+
+        document.getElementById('downloadBtn').onclick = async (e) => {
+            e.preventDefault();
+            const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua';
+            try {
+                const response = await fetch(fileUrl);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'skebob_trashtalk.lua';
+                document.body.appendChild(a); a.click(); a.remove();
+            } catch(err) { window.open(fileUrl, '_blank'); }
+        };
     </script>
 </body>
 </html>
