@@ -6,7 +6,7 @@
     <title>skebob.vip</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238acc14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'%3E%3C/rect%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'%3E%3C/path%3E%3C/svg%3E">
     
-    <!-- Скрипт Google reCAPTCHA -->
+    <!-- Google reCAPTCHA Script -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
@@ -29,7 +29,7 @@
         
         .top-line { height: 2px; width: 100%; background: linear-gradient(90deg, #111 0%, var(--accent-green) 50%, #111 100%); position: fixed; top: 0; left: 0; z-index: 1000; }
         
-        /* ГЛАВНЫЙ ЭКРАН С КРУПНЫМ ЛОГОТИПОМ */
+        /* LANDING SCREEN WITH LARGE LOGO */
         .landing-container { 
             display: flex; 
             justify-content: center; 
@@ -55,7 +55,7 @@
         .landing-logo .white { color: #ffffff !important; }
         .landing-logo .green { color: var(--accent-green) !important; }
 
-        /* ЭКРАН ФОРУМА (КОМПАКТНЫЙ GS СТИЛЬ) */
+        /* COMPACT GS STYLE FORUM CONTAINER */
         .forum-wrapper { width: 95%; max-width: 960px; margin: 25px auto 40px auto; display: none; }
         
         .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
@@ -96,6 +96,18 @@
         
         .f-text { color: var(--text-muted); font-size: 10px; margin-top: 3px; margin-bottom: 3px; line-height: 1.4; }
         
+        /* IN-SITE ERROR MESSAGE STYLING */
+        .f-error-msg {
+            display: none;
+            background: #2d1313;
+            border: 1px solid #752222;
+            color: #ff8888;
+            padding: 8px 12px;
+            font-size: 10px;
+            margin-bottom: 12px;
+            border-radius: 2px;
+        }
+
         .page-view { display: none; }
         .page-view.active { display: block; }
 
@@ -107,17 +119,17 @@
 
     <div class="top-line"></div>
 
-    <!-- 1. ГЛАВНЫЙ ЭКРАН (КРУПНЫЙ ЛОГОТИП ПО ЦЕНТРУ) -->
+    <!-- 1. LANDING SCREEN (LARGE LOGO) -->
     <div class="landing-container" id="landingPage">
         <div class="landing-logo" onclick="openForum()">
             <span class="white">skebob</span><span class="green">.vip</span>
         </div>
     </div>
 
-    <!-- 2. ФОРУМ В СТАРОМ СТИЛЕ GS -->
+    <!-- 2. FORUM SCREEN -->
     <div class="forum-wrapper" id="forumWrapper">
         
-        <!-- Шапка форума -->
+        <!-- Header -->
         <div class="f-box">
             <div class="f-content" style="padding: 10px 14px;">
                 <div style="font-size: 22px; cursor: pointer;" onclick="closeForum()">
@@ -134,9 +146,9 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА: INDEX -->
+        <!-- PAGE: INDEX -->
         <div id="viewIndex" class="page-view active">
-            <!-- ДЛЯ НЕАВТОРИЗОВАННЫХ -->
+            <!-- FOR GUESTS -->
             <div id="indexLoggedOut" class="f-box">
                 <div class="f-header">Info</div>
                 <div class="f-content">
@@ -145,7 +157,7 @@
                 </div>
             </div>
 
-            <!-- ДЛЯ АВТОРИЗОВАННЫХ -->
+            <!-- FOR LOGGED-IN USERS -->
             <div id="indexLoggedIn" class="f-box" style="display: none;">
                 <div class="f-header">Information</div>
                 <div class="f-content">
@@ -163,12 +175,15 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА: РЕГИСТРАЦИЯ -->
+        <!-- PAGE: REGISTER -->
         <div id="viewRegister" class="page-view">
             <div class="f-box">
                 <div class="f-header">Register</div>
                 <div class="f-content">
                     
+                    <!-- IN-SITE ERROR CONTAINER -->
+                    <div class="f-error-msg" id="regErrorMsg"></div>
+
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Your username must be alphanumeric between 3 and 25 characters long</legend>
                         <label class="f-label">Username</label>
@@ -203,7 +218,7 @@
                         <div class="f-text" style="color: var(--legend-blue); cursor: pointer; margin-top: 4px; display: inline-block;" onclick="showInviteInfo()">Need an invite code?</div>
                     </fieldset>
 
-                    <!-- ВЫБОР ЧАСОВОГО ПОЯСА -->
+                    <!-- TIMEZONE SELECT -->
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Set your localisation options</legend>
                         <div class="f-text">For the forum to display times correctly you must select your local time zone. If Daylight Savings Time is in effect you should also check the option provided which will advance times by 1 hour.</div>
@@ -279,11 +294,15 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА: ВХОД -->
+        <!-- PAGE: LOGIN -->
         <div id="viewLogin" class="page-view">
             <div class="f-box">
                 <div class="f-header">Login</div>
                 <div class="f-content">
+                    
+                    <!-- IN-SITE ERROR CONTAINER -->
+                    <div class="f-error-msg" id="loginErrorMsg"></div>
+
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Account Credentials</legend>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -302,12 +321,15 @@
             </div>
         </div>
 
-        <!-- СТРАНИЦА: ЛИЧНЫЙ КАБИНЕТ -->
+        <!-- PAGE: PROFILE -->
         <div id="viewProfile" class="page-view">
             <div class="f-box">
                 <div class="f-header">User Control Panel</div>
                 <div class="f-content">
                     
+                    <!-- IN-SITE ERROR / INFO CONTAINER -->
+                    <div class="f-error-msg" id="profileErrorMsg"></div>
+
                     <div class="profile-card">
                         <img id="profileAvatar" src="https://via.placeholder.com/48/000000/8acc14?text=U" class="profile-avatar" alt="Avatar">
                         <div>
@@ -316,7 +338,7 @@
                         </div>
                     </div>
 
-                    <!-- ГЕНЕРАЦИЯ ИНВАЙТОВ -->
+                    <!-- INVITE CODE GENERATION -->
                     <fieldset class="f-fieldset">
                         <legend class="f-legend">Invitation Codes</legend>
                         <div class="f-text">You are eligible to generate 1 invitation code every 30 days.</div>
@@ -372,27 +394,45 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Функция переводчик ошибок Firebase в понятный вид
+        // Firebase Error Translator to English
         function getFriendlyErrorMessage(error) {
-            switch (error.code) {
+            const code = typeof error === 'string' ? error : error.code;
+            switch (code) {
                 case 'auth/email-already-in-use':
-                    return 'Эта почта уже зарегистрирована!';
+                    return 'This email address is already registered!';
                 case 'auth/invalid-email':
-                    return 'Некорректный адрес электронной почты!';
+                    return 'The email address provided is invalid!';
                 case 'auth/weak-password':
-                    return 'Пароль слишком слабый (минимум 6 символов)!';
+                    return 'Password is too weak. Minimum 6 characters required!';
                 case 'auth/user-not-found':
                 case 'auth/wrong-password':
                 case 'auth/invalid-credential':
-                    return 'Неверная почта или пароль!';
+                    return 'Invalid email address or password!';
                 case 'auth/network-request-failed':
-                    return 'Ошибка сети. Проверьте подключение к интернету.';
+                    return 'Network error. Please check your internet connection.';
                 default:
-                    return 'Неудачный запрос. Проверьте введенные данные.';
+                    return 'An error occurred. Please check your input and try again.';
             }
         }
 
-        // Переключение с Лендинга на Форум
+        // Display Error inside the page UI
+        function showError(elementId, message) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.textContent = message;
+                el.style.display = 'block';
+            }
+        }
+
+        // Clear error messages on tab switch
+        function clearErrors() {
+            document.querySelectorAll('.f-error-msg').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+        }
+
+        // Toggle Landing vs Forum
         window.openForum = function() {
             document.getElementById('landingPage').style.display = 'none';
             document.getElementById('forumWrapper').style.display = 'block';
@@ -402,7 +442,7 @@
             document.getElementById('landingPage').style.display = 'flex';
         }
 
-        // Скачивание файла через Blob
+        // Blob File Download
         window.downloadScript = async function(e) {
             if (e) e.preventDefault();
             const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua';
@@ -423,11 +463,12 @@
         }
 
         window.showInviteInfo = function() {
-            alert("Invite codes are generated exclusively by existing members or administrators. Contact a community manager to receive an invite code.");
+            showError('regErrorMsg', "Invite codes are generated exclusively by existing members or administrators.");
         }
 
-        // Генерация 1 инвайта в месяц
+        // Invite Generation Logic (1 per 30 days)
         window.handleGenerateInvite = async function() {
+            clearErrors();
             const user = auth.currentUser;
             if (!user) return;
 
@@ -444,7 +485,7 @@
                         const timePassed = now - userData.lastInviteGeneratedAt;
                         if (timePassed < THIRTY_DAYS) {
                             const daysLeft = Math.ceil((THIRTY_DAYS - timePassed) / (24 * 60 * 60 * 1000));
-                            alert(`You can generate another invite code in ${daysLeft} day(s).`);
+                            showError('profileErrorMsg', `You can generate another invite code in ${daysLeft} day(s).`);
                             return;
                         }
                     }
@@ -463,14 +504,14 @@
                 }, { merge: true });
 
                 document.getElementById('generatedInviteInput').value = randomCode;
-                alert(`Invite code created: ${randomCode}`);
 
             } catch (error) {
-                alert(getFriendlyErrorMessage(error));
+                showError('profileErrorMsg', 'Failed to generate invite code. Please try again later.');
             }
         }
 
         window.switchTab = function(tabName) {
+            clearErrors();
             document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.f-nav a').forEach(el => el.classList.remove('active'));
             
@@ -492,6 +533,7 @@
         }
 
         window.handleRegister = async function() {
+            clearErrors();
             const user = document.getElementById('regUser').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value.trim();
@@ -501,19 +543,25 @@
             if (typeof grecaptcha !== 'undefined') {
                 const recaptchaResponse = grecaptcha.getResponse();
                 if (recaptchaResponse.length === 0) { 
-                    alert('Пожалуйста, пройдите проверку "Are you a human?".'); 
+                    showError('regErrorMsg', 'Please complete the "Are you a human?" reCAPTCHA verification.'); 
                     return; 
                 }
             }
 
-            if (!email || !pass || !code) { alert('Заполните все необходимые поля!'); return; }
-            if (pass !== passConfirm) { alert('Пароли не совпадают!'); return; }
+            if (!email || !pass || !code) { 
+                showError('regErrorMsg', 'Please fill in all required fields!'); 
+                return; 
+            }
+            if (pass !== passConfirm) { 
+                showError('regErrorMsg', 'Entered passwords do not match!'); 
+                return; 
+            }
 
             try {
                 const inviteRef = doc(db, "invites", code);
                 const inviteSnap = await getDoc(inviteRef);
                 if (!inviteSnap.exists() || inviteSnap.data().used) { 
-                    alert('Неверный или уже использованный инвайт-код!'); 
+                    showError('regErrorMsg', 'Invalid or already redeemed invitation code!'); 
                     return; 
                 }
                 
@@ -526,15 +574,16 @@
                 
                 switchTab('index');
             } catch (error) { 
-                alert(getFriendlyErrorMessage(error)); 
+                showError('regErrorMsg', getFriendlyErrorMessage(error)); 
             }
         }
 
         window.handleLogin = async function() {
+            clearErrors();
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
             if (!email || !pass) {
-                alert('Введите почту и пароль!');
+                showError('loginErrorMsg', 'Please enter both your email address and password!');
                 return;
             }
             
@@ -542,7 +591,7 @@
                 await signInWithEmailAndPassword(auth, email, pass);
                 switchTab('index');
             } catch (error) { 
-                alert(getFriendlyErrorMessage(error)); 
+                showError('loginErrorMsg', getFriendlyErrorMessage(error)); 
             }
         }
 
@@ -552,6 +601,7 @@
         }
 
         window.handleUpdateProfile = async function() {
+            clearErrors();
             const url = document.getElementById('avatarUrlInput').value.trim();
             const nickname = document.getElementById('nicknameInput').value.trim();
             const updateData = {};
@@ -565,9 +615,8 @@
                 if (nickname) document.getElementById('userDisplayTitle').textContent = nickname;
                 document.getElementById('avatarUrlInput').value = '';
                 document.getElementById('nicknameInput').value = '';
-                alert('Профиль успешно обновлен!');
             } catch (error) { 
-                alert(getFriendlyErrorMessage(error)); 
+                showError('profileErrorMsg', 'Failed to update profile settings.');
             }
         }
 
