@@ -14,16 +14,22 @@
         .f-box { background: var(--bg-box); border: 1px solid var(--border-dark); margin-bottom: 12px; border-radius: 2px; }
         .f-header { background: var(--bg-header); padding: 7px 12px; font-weight: bold; color: #dddddd; border-bottom: 1px solid var(--border-dark); font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
         .f-content { padding: 14px 18px; border-top: 1px solid var(--border-light); }
-        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
+        .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; justify-content: space-between; align-items: center; }
+        .f-nav-links { display: flex; gap: 12px; }
         .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
         .f-nav a:hover, .f-nav a.active { color: #ffffff; text-decoration: underline; font-weight: bold; }
-        .subtabs { display: flex; gap: 6px; margin-bottom: 12px; }
+        .subtabs { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .subtabs-left { display: flex; gap: 6px; }
         .subtab-btn { background: #1a1a1a; border: 1px solid #000; color: #aaa; padding: 5px 10px; cursor: pointer; font-size: 10px; }
         .subtab-btn.active { background: #2c2c2c; color: var(--accent-green); border-color: var(--accent-green); font-weight: bold; }
         .cfg-grid { display: flex; flex-direction: column; gap: 8px; }
         .cfg-item { background: #1a1a1a; border: 1px solid #000000; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
         .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; text-decoration: none; }
         .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
+        .f-input, .f-textarea { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 5px; width: 100%; outline: none; font-size: 10px; margin-top: 4px; margin-bottom: 8px; }
+        .f-textarea { height: 60px; resize: vertical; }
+        .modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-box { background: var(--bg-box); border: 1px solid var(--border-light); width: 450px; padding: 15px; border-radius: 2px; }
     </style>
 </head>
 <body>
@@ -35,36 +41,35 @@
                     <span style="color: #fff;">skebob</span><span style="color: #8acc14;">.vip</span>
                 </div>
                 <div class="f-nav">
-                    <a href="index.html">Index</a>
-                    <a href="forum.html" class="active">Forums & Configs</a>
-                    <a href="profile.html">User Control Panel</a>
+                    <div class="f-nav-links">
+                        <a href="index.html">Index</a>
+                        <a href="forum.html" class="active">Forums & Configs</a>
+                        <a href="profile.html">User Control Panel</a>
+                    </div>
+                    <div><a href="rules.html" style="color: var(--accent-green);">Rules</a></div>
                 </div>
             </div>
         </div>
 
         <div class="subtabs">
-            <button class="subtab-btn active" onclick="switchTab('neverlose')">Neverlose CFG & Lua</button>
-            <button class="subtab-btn" onclick="switchTab('gamesense')">GameSense CFG & Lua</button>
+            <div class="subtabs-left">
+                <button class="subtab-btn active" onclick="switchTab('neverlose')">Neverlose CFG & Lua</button>
+                <button class="subtab-btn" onclick="switchTab('gamesense')">GameSense CFG & Lua</button>
+            </div>
+            <button class="f-btn" onclick="openUploadModal()">+ Залить конфиг / луа</button>
         </div>
 
         <!-- NEVERLOSE SECTION -->
         <div id="tabNeverlose" class="f-box">
             <div class="f-header"><span>Neverlose - Configs & Lua Scripts</span><span style="color:var(--accent-green);">Cyberpunk Edition</span></div>
             <div class="f-content">
-                <div class="cfg-grid">
+                <div class="cfg-grid" id="neverloseList">
                     <div class="cfg-item">
                         <div>
                             <div style="font-weight:bold; color:#fff;">Neverlose Ultimate Visual & Rage CFG</div>
-                            <div style="color:#777; font-size:9px; margin-top:2px;">Includes custom Lua scripts and neon visual theme settings.</div>
+                            <div style="color:#777; font-size:9px; margin-top:2px;">Автор: skebob | Одобрено стаффом</div>
                         </div>
-                        <a href="#" class="f-btn" onclick="alert('Downloading Neverlose CFG...');">Download CFG</a>
-                    </div>
-                    <div class="cfg-item">
-                        <div>
-                            <div style="font-weight:bold; color:#fff;">Neverlose Minions Theme JS/Lua Utility</div>
-                            <div style="color:#777; font-size:9px; margin-top:2px;">Custom elements styled with dark cyberpunk visuals.</div>
-                        </div>
-                        <a href="#" class="f-btn" onclick="alert('Downloading Neverlose Addon...');">Download Script</a>
+                        <a href="#" class="f-btn" onclick="alert('Скачивание конфига...');">Скачать</a>
                     </div>
                 </div>
             </div>
@@ -74,22 +79,43 @@
         <div id="tabGamesense" class="f-box" style="display:none;">
             <div class="f-header"><span>GameSense - Configs & Lua Scripts</span><span style="color:var(--accent-green);">V3 / V4</span></div>
             <div class="f-content">
-                <div class="cfg-grid">
+                <div class="cfg-grid" id="gamesenseList">
                     <div class="cfg-item">
                         <div>
                             <div style="font-weight:bold; color:#fff;">GameSense Master Resolver & Anti-Aim CFG</div>
-                            <div style="color:#777; font-size:9px; margin-top:2px;">Optimized for strict competitive matches.</div>
+                            <div style="color:#777; font-size:9px; margin-top:2px;">Автор: team | Одобрено стаффом</div>
                         </div>
-                        <a href="#" class="f-btn" onclick="alert('Downloading GameSense CFG...');">Download CFG</a>
-                    </div>
-                    <div class="cfg-item">
-                        <div>
-                            <div style="font-weight:bold; color:#fff;">skebob TrashTalk & Utility Lua for GS</div>
-                            <div style="color:#777; font-size:9px; margin-top:2px;">Official community script built by team members.</div>
-                        </div>
-                        <a href="#" class="f-btn" onclick="alert('Downloading GS Lua...');">Download Lua</a>
+                        <a href="#" class="f-btn" onclick="alert('Скачивание конфига...');">Скачать</a>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ЗАЯВКИ -->
+    <div class="modal-bg" id="uploadModal">
+        <div class="modal-box">
+            <div style="font-weight: bold; margin-bottom: 10px; color: #fff;">Подать заявку на публикацию CFG / Lua</div>
+            <div style="font-size: 10px; color: #888; margin-bottom: 8px;">Заявка уйдёт на проверку админам. Без описания и скриншотов конфиг отклонят!</div>
+            
+            <label style="font-size: 10px; font-weight: bold;">Читы / Софт</label>
+            <select class="f-input" id="upSoftware">
+                <option value="neverlose">Neverlose</option>
+                <option value="gamesense">GameSense</option>
+            </select>
+
+            <label style="font-size: 10px; font-weight: bold;">Название конфига / луа</label>
+            <input type="text" class="f-input" id="upTitle" placeholder="Например: Legit/Rage V2 by Name">
+
+            <label style="font-size: 10px; font-weight: bold;">Ссылка на скачивание (Mega, Google Drive, GitHub и т.д.)</label>
+            <input type="text" class="f-input" id="upLink" placeholder="https://...">
+
+            <label style="font-size: 10px; font-weight: bold;">Описание и скриншоты (обязательно)</label>
+            <textarea class="f-textarea" id="upDesc" placeholder="Опиши что внутри, скинь ссылки на скриншоты меню/визуалов..."></textarea>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="f-btn" id="submitUploadBtn">Отправить на проверку</button>
+                <button class="f-btn" style="background: #333;" onclick="closeUploadModal()">Отмена</button>
             </div>
         </div>
     </div>
@@ -97,12 +123,19 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        
+        import { getFirestore, collection, addf, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // исправление функции добавления
+        import { setDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
         const app = initializeApp({ apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10", authDomain: "skebob-vip-4aa40.firebaseapp.com", projectId: "skebob-vip-4aa40", storageBucket: "skebob-vip-4aa40.firebasestorage.app", messagingSenderId: "853888273098", appId: "1:853888273098:web:d46ec3bbb556693edd4233" });
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
+        let currentUser = null;
         onAuthStateChanged(auth, (user) => {
             if(!user) location.href = 'login.html';
+            currentUser = user;
+            loadApprovedConfigs();
         });
 
         window.switchTab = function(name) {
@@ -115,6 +148,69 @@
                 document.getElementById('tabNeverlose').style.display = 'none';
                 document.getElementById('tabGamesense').style.display = 'block';
                 event.target.classList.add('active');
+            }
+        }
+
+        window.openUploadModal = () => { document.getElementById('uploadModal').style.display = 'flex'; }
+        window.closeUploadModal = () => { document.getElementById('uploadModal').style.display = 'none'; }
+
+        document.getElementById('submitUploadBtn').onclick = async () => {
+            const software = document.getElementById('upSoftware').value;
+            const title = document.getElementById('upTitle').value.trim();
+            const link = document.getElementById('upLink').value.trim();
+            const desc = document.getElementById('upDesc').value.trim();
+
+            if(!title || !link || !desc) {
+                alert('Заполни все поля, включая описание и скриншоты!');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "submissions"), {
+                    uid: currentUser.uid,
+                    author: currentUser.displayName || currentUser.email,
+                    software,
+                    title,
+                    link,
+                    desc,
+                    status: 'pending', // pending, approved, rejected
+                    createdAt: Date.now()
+                });
+                alert('Заявка успешно отправлена! Админы проверят её в ближайшее время.');
+                closeUploadModal();
+            } catch(e) {
+                alert('Ошибка отправки: ' + e.message);
+            }
+        };
+
+        async function loadApprovedConfigs() {
+            // Загрузка одобренных конфигов из базы
+            try {
+                const q = query(collection(db, "submissions"), where("status", "==", "approved"));
+                const querySnapshot = await getDocs(q);
+                
+                let nlHTML = '';
+                let gsHTML = '';
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const itemHTML = `
+                        <div class="cfg-item">
+                            <div>
+                                <div style="font-weight:bold; color:#fff;">${data.title}</div>
+                                <div style="color:#777; font-size:9px; margin-top:2px;">Автор: ${data.author} | ${data.desc}</div>
+                            </div>
+                            <a href="${data.link}" target="_blank" class="f-btn">Скачать</a>
+                        </div>
+                    `;
+                    if(data.software === 'neverlose') nlHTML += itemHTML;
+                    else gsHTML += itemHTML;
+                });
+
+                if(nlHTML) document.getElementById('neverloseList').innerHTML += nlHTML;
+                if(gsHTML) document.getElementById('gamesenseList').innerHTML += gsHTML;
+            } catch(e) {
+                console.log("Error loading configs", e);
             }
         }
     </script>
