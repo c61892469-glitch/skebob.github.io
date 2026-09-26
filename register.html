@@ -75,7 +75,10 @@
                 <fieldset class="f-fieldset">
                     <legend class="f-legend">Enter a valid email address</legend>
                     <label class="f-label">Email</label>
-                    <input type="email" class="f-input" id="regEmail">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="email" class="f-input" id="regEmail">
+                        <button type="button" class="f-btn" onclick="handleSendVerification()">Send Verification</button>
+                    </div>
                 </fieldset>
                 <fieldset class="f-fieldset">
                     <legend class="f-legend">You must be invited to join this forum</legend>
@@ -94,7 +97,7 @@
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -118,6 +121,40 @@
             const el = document.getElementById('regSuccessMsg');
             el.textContent = msg;
             el.style.display = 'block';
+        }
+
+        // Функция ручной отправки письма подтверждения при нажатии на кнопку справа от почты
+        window.handleSendVerification = async function() {
+            document.getElementById('regErrorMsg').style.display = 'none';
+            document.getElementById('regSuccessMsg').style.display = 'none';
+
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+
+            if (!email || !pass) {
+                showError('Введите Email и Пароль, чтобы отправить письмо верификации!');
+                return;
+            }
+
+            try {
+                // Пытаемся временно войти или создать аккаунт для отправки письма, 
+                // либо используем текущего залогиненного юзера. Пробуем войти, если аккаунт уже создан:
+                let user = auth.currentUser;
+                if (!user) {
+                    try {
+                        const cred = await signInWithEmailAndPassword(auth, email, pass);
+                        user = cred.user;
+                    } catch (e) {
+                        showError('Сначала введите корректный пароль или создайте аккаунт через кнопку Register.');
+                        return;
+                    }
+                }
+
+                await sendEmailVerification(user);
+                showSuccess('Письмо с подтверждением отправлено на ' + email + '!');
+            } catch (error) {
+                showError('Ошибка отправки: ' + error.message);
+            }
         }
 
         window.handleRegister = async function() {
@@ -155,24 +192,30 @@
                     return; 
                 }
                 
-                // Создание аккаунта напрямую (без отправки писем подтверждения)
+                // Создание аккаунта
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const userObj = userCredential.user;
 
+                // Отправляем письмо верификации при регистрации
+                try {
+                    await sendEmailVerification(userObj);
+                } catch (err) {
+                    console.error("Не удалось отправить верификацию:", err);
+                }
+
                 await updateDoc(inviteRef, { used: true });
-                
                 
                 if (user) {
                     await updateProfile(userObj, { displayName: user });
                     await setDoc(doc(db, "users", userObj.uid), { 
                         username: user,
                         email: email,
-                        hwid: "" // Поле HWID изначально пустое — игра заполнит его при первом входе!
+                        hwid: "" 
                     }, { merge: true });
                 }
                 
-                showSuccess('Registration successful! Redirecting...');
-                setTimeout(() => { location.href = 'index.html'; }, 1000);
+                showSuccess('Registration successful! Check your email for verification.');
+                setTimeout(() => { location.href = 'index.html'; }, 2000);
             } catch (error) { 
                 showError(error.message); 
             }
