@@ -109,22 +109,23 @@
             document.getElementById('forumWrapper').style.display = 'none';
             document.getElementById('landingPage').style.display = 'flex';
         }
+
         window.downloadScript = async function(e) {
             if (e) e.preventDefault();
-            const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua';
+            const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/skebob.lua';
             try {
                 const response = await fetch(fileUrl);
                 const text = await response.text();
                 const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-                const blobUrl = window.URL.createObjectURL(blob);
+                const url = window.URL.createObjectURL(blob);
                 
                 const a = document.createElement('a');
-                a.href = blobUrl;
+                a.href = url;
                 a.download = 'skebob_trashtalk.lua';
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-                window.URL.revokeObjectURL(blobUrl);
+                window.URL.revokeObjectURL(url);
             } catch (err) {
                 const a = document.createElement('a');
                 a.href = fileUrl;
