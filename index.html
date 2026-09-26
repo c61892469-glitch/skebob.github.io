@@ -114,17 +114,25 @@
             const fileUrl = 'https://raw.githubusercontent.com/c6189246-glitch/skebob.github.io/main/script.lua';
             try {
                 const response = await fetch(fileUrl);
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
+                const text = await response.text();
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const blobUrl = window.URL.createObjectURL(blob);
+                
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = blobUrl;
                 a.download = 'skebob_trashtalk.lua';
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-                window.URL.revokeObjectURL(url);
+                window.URL.revokeObjectURL(blobUrl);
             } catch (err) {
-                window.open(fileUrl, '_blank');
+                const a = document.createElement('a');
+                a.href = fileUrl;
+                a.download = 'skebob_trashtalk.lua';
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
             }
         }
 
