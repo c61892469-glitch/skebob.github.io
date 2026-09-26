@@ -57,7 +57,8 @@
                     <img id="profileAvatar" src="https://via.placeholder.com/48/000000/8acc14?text=U" class="profile-avatar" alt="Avatar">
                     <div>
                         <div style="font-weight: bold; color: #ffffff;" id="userDisplayTitle">User</div>
-                        <div style="color: var(--accent-green); font-size: 10px;" id="userStatusText">Status: Active Member</div>
+                        <div style="color: var(--accent-green); font-size: 10px; margin-bottom: 2px;" id="userStatusText">Status: Active Member</div>
+                        <div style="color: var(--text-muted); font-size: 10px;" id="userHwidText">HWID: <span style="color: #fff;" id="hwidDisplay">Not bound</span></div>
                     </div>
                 </div>
                 <fieldset class="f-fieldset" id="adminPanelSection" style="display: none; border-color: var(--accent-green);">
@@ -131,6 +132,11 @@
                     const data = userDocSnap.data();
                     if (data.photoURL) {
                         document.getElementById('profileAvatar').src = data.photoURL;
+                    }
+                    if (data.hwid) {
+                        document.getElementById('hwidDisplay').textContent = data.hwid;
+                    } else {
+                        document.getElementById('hwidDisplay').textContent = "Not bound";
                     }
                     if (data.role === 'admin') {
                         document.getElementById('adminPanelSection').style.display = 'block';
