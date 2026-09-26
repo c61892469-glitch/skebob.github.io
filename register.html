@@ -73,7 +73,7 @@
                     </div>
                 </fieldset>
                 <fieldset class="f-fieldset">
-                    <legend class="f-legend">Enter a valid email address</legend>
+                    <legend class="f-legend">Enter a valid email address and verify it</legend>
                     <label class="f-label">Email</label>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="email" class="f-input" id="regEmail">
@@ -97,7 +97,7 @@
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -123,7 +123,6 @@
             el.style.display = 'block';
         }
 
-        // Функция ручной отправки письма подтверждения при нажатии на кнопку справа от почты
         window.handleSendVerification = async function() {
             document.getElementById('regErrorMsg').style.display = 'none';
             document.getElementById('regSuccessMsg').style.display = 'none';
@@ -132,28 +131,26 @@
             const pass = document.getElementById('regPass').value.trim();
 
             if (!email || !pass) {
-                showError('Введите Email и Пароль, чтобы отправить письмо верификации!');
+                showError('Please enter Email and Password first to send verification!');
                 return;
             }
 
             try {
-                // Пытаемся временно войти или создать аккаунт для отправки письма, 
-                // либо используем текущего залогиненного юзера. Пробуем войти, если аккаунт уже создан:
                 let user = auth.currentUser;
                 if (!user) {
                     try {
                         const cred = await signInWithEmailAndPassword(auth, email, pass);
                         user = cred.user;
                     } catch (e) {
-                        showError('Сначала введите корректный пароль или создайте аккаунт через кнопку Register.');
+                        showError('Please enter the correct password or complete registration first.');
                         return;
                     }
                 }
 
                 await sendEmailVerification(user);
-                showSuccess('Письмо с подтверждением отправлено на ' + email + '!');
+                showSuccess('Verification email has been sent to ' + email + '!');
             } catch (error) {
-                showError('Ошибка отправки: ' + error.message);
+                showError('Send error: ' + error.message);
             }
         }
 
@@ -175,7 +172,7 @@
                 }
             }
 
-            if (!email || !pass || !code) { 
+            if (!email || !pass || !code || !user) { 
                 showError('Please fill in all required fields!'); 
                 return; 
             }
@@ -192,29 +189,33 @@
                     return; 
                 }
                 
-                // Создание аккаунта
+                // Создаем пользователя
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const userObj = userCredential.user;
 
-                // Отправляем письмо верификации при регистрации
-                try {
-                    await sendEmailVerification(userObj);
-                } catch (err) {
-                    console.error("Не удалось отправить верификацию:", err);
+                // Сразу отправляем письмо подтверждения
+                await sendEmailVerification(userObj);
+
+                // Перезагружаем данные пользователя, чтобы проверить статус верификации
+                await userObj.reload();
+
+                if (!auth.currentUser.emailVerified) {
+                    // Если почта не подтверждена через ссылку в письме, блокируем регистрацию и удаляем/выходим
+                    await signOut(auth);
+                    showError('Registration requires email verification! Please check your inbox and click the verification link before registering.');
+                    return;
                 }
 
                 await updateDoc(inviteRef, { used: true });
                 
-                if (user) {
-                    await updateProfile(userObj, { displayName: user });
-                    await setDoc(doc(db, "users", userObj.uid), { 
-                        username: user,
-                        email: email,
-                        hwid: "" 
-                    }, { merge: true });
-                }
+                await updateProfile(userObj, { displayName: user });
+                await setDoc(doc(db, "users", userObj.uid), { 
+                    username: user,
+                    email: email,
+                    hwid: "" 
+                }, { merge: true });
                 
-                showSuccess('Registration successful! Check your email for verification.');
+                showSuccess('Registration successful! Redirecting...');
                 setTimeout(() => { location.href = 'index.html'; }, 2000);
             } catch (error) { 
                 showError(error.message); 
