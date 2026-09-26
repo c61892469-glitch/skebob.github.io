@@ -189,34 +189,28 @@
                     return; 
                 }
                 
-                // Создаем пользователя
+                // Создаем аккаунт
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const userObj = userCredential.user;
 
-                // Сразу отправляем письмо подтверждения
-                await sendEmailVerification(userObj);
-
-                // Перезагружаем данные пользователя, чтобы проверить статус верификации
-                await userObj.reload();
-
-                if (!auth.currentUser.emailVerified) {
-                    // Если почта не подтверждена через ссылку в письме, блокируем регистрацию и удаляем/выходим
-                    await signOut(auth);
-                    showError('Registration requires email verification! Please check your inbox and click the verification link before registering.');
-                    return;
-                }
-
+                // Сохраняем данные пользователя в базу
                 await updateDoc(inviteRef, { used: true });
-                
                 await updateProfile(userObj, { displayName: user });
                 await setDoc(doc(db, "users", userObj.uid), { 
                     username: user,
                     email: email,
                     hwid: "" 
                 }, { merge: true });
+
+                // Отправляем письмо для подтверждения
+                await sendEmailVerification(userObj);
+
+                // Сразу разлогиниваем, чтобы пользователь не смог зайти без подтверждения
+                await signOut(auth);
                 
-                showSuccess('Registration successful! Redirecting...');
-                setTimeout(() => { location.href = 'index.html'; }, 2000);
+                // Выводим сообщение о том, что аккаунт создан, но требуется подтверждение почты
+                showSuccess('Registration successful! Please check your email and confirm your address before logging in.');
+                setTimeout(() => { location.href = 'login.html'; }, 3500);
             } catch (error) { 
                 showError(error.message); 
             }
