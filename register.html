@@ -161,9 +161,14 @@
 
                 await updateDoc(inviteRef, { used: true });
                 
+                
                 if (user) {
                     await updateProfile(userObj, { displayName: user });
-                    await setDoc(doc(db, "users", userObj.uid), { displayName: user }, { merge: true });
+                    await setDoc(doc(db, "users", userObj.uid), { 
+                        username: user,
+                        email: email,
+                        hwid: "" // Поле HWID изначально пустое — игра заполнит его при первом входе!
+                    }, { merge: true });
                 }
                 
                 showSuccess('Registration successful! Redirecting...');
