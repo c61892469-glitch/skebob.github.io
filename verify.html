@@ -21,15 +21,14 @@
         .f-nav { background: var(--bg-nav); border: 1px solid var(--border-dark); padding: 6px 12px; display: flex; gap: 12px; font-size: 10px; margin-top: 10px; margin-bottom: 8px; }
         .f-nav a { color: var(--text-main); text-decoration: none; font-size: 10px; }
         .f-nav a:hover { color: #ffffff; text-decoration: underline; }
-        .f-fieldset { border: 1px solid var(--border-light); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px; }
-        .f-legend { color: var(--legend-blue); padding: 0 4px; font-size: 10px; margin-left: 5px; }
-        .f-label { font-weight: bold; display: block; margin-bottom: 4px; color: #cccccc; font-size: 10px; }
-        .f-input { background: var(--bg-input); border: 1px solid #000000; color: #eeeeee; padding: 4px 6px; width: 100%; max-width: 250px; outline: none; font-size: 10px; }
         .f-btn { background: linear-gradient(to bottom, #2a2a2a, #1a1a1a); color: #cccccc; border: 1px solid #000000; border-radius: 2px; padding: 4px 12px; font-weight: bold; cursor: pointer; font-size: 10px; }
         .f-btn:hover { background: linear-gradient(to bottom, #333333, #222222); color: #ffffff; }
         .f-error-msg { display: none; background: #2d1313; border: 1px solid #752222; color: #ff8888; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; border-radius: 2px; }
         .f-success-msg { display: none; background: #132d16; border: 1px solid #22752a; color: #88ff9e; padding: 8px 12px; font-size: 10px; margin-bottom: 12px; border-radius: 2px; }
         .info-box { background: var(--bg-input); border: 1px solid var(--border-light); padding: 10px; margin-bottom: 12px; color: var(--text-main); line-height: 1.5; }
+        .instructions-box { background: var(--bg-input); border: 1px solid var(--border-light); padding: 10px 12px; margin-top: 12px; color: var(--text-muted); font-size: 10px; line-height: 1.6; }
+        .instructions-box ul { padding-left: 15px; margin-top: 4px; }
+        .instructions-box li { margin-bottom: 3px; }
     </style>
 </head>
 <body>
@@ -52,12 +51,22 @@
             <div class="f-header">Confirm Your Email</div>
             <div class="f-content">
                 <div class="info-box">
-                    <strong>Account successfully created!</strong><br>
+                    <strong>Account setup in progress...</strong><br>
                     We have sent a verification link to <span id="userEmailDisplay" style="color: var(--accent-green);">your email</span>.<br>
-                    Please check your inbox and confirm your email address to activate your account.
+                    Please check your inbox and follow the link to complete your registration.
                 </div>
                 <div class="f-error-msg" id="verifyErrorMsg"></div>
                 <div class="f-success-msg" id="verifySuccessMsg"></div>
+
+                <div class="instructions-box">
+                    <strong>Didn't receive the email? Try these steps:</strong>
+                    <ul>
+                        <li>Check your <strong>Spam</strong> or <strong>Junk</strong> folder.</li>
+                        <li>Make sure your email address was entered correctly during registration.</li>
+                        <li>Wait a few minutes, as delivery can sometimes be delayed.</li>
+                        <li>Click the <strong>"Resend Verification"</strong> button below to send a new link.</li>
+                    </ul>
+                </div>
             </div>
             <div style="padding: 8px 18px 12px 18px; display: flex; gap: 10px;">
                 <button class="f-btn" onclick="handleResend()">Resend Verification</button>
@@ -67,7 +76,8 @@
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, sendEmailVerification, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
@@ -79,21 +89,9 @@
         };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        let currentUser = null;
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('userEmailDisplay').textContent = user.email;
-            } else {
-                // Если сессии нет (например, зашли напрямую по ссылке), пробуем взять из localStorage
-                const savedEmail = localStorage.getItem('reg_email');
-                if (savedEmail) {
-                    document.getElementById('userEmailDisplay').textContent = savedEmail;
-                }
-            }
-        });
+        let createdUserObj = null;
 
         function showError(msg) {
             const el = document.getElementById('verifyErrorMsg');
@@ -106,25 +104,64 @@
             el.style.display = 'block';
         }
 
+        window.addEventListener('DOMContentLoaded', async () => {
+            const username = localStorage.getItem('temp_reg_user');
+            const email = localStorage.getItem('temp_reg_email');
+            const pass = localStorage.getItem('temp_reg_pass');
+            const code = localStorage.getItem('temp_reg_code');
+
+            if (!email || !pass || !username || !code) {
+                showError('No pending registration data found. Please register again.');
+                return;
+            }
+
+            document.getElementById('userEmailDisplay').textContent = email;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                createdUserObj = userCredential.user;
+
+                await updateDoc(doc(db, "invites", code), { used: true });
+                await updateProfile(createdUserObj, { displayName: username });
+                await setDoc(doc(db, "users", createdUserObj.uid), { 
+                    username: username,
+                    email: email,
+                    hwid: "" 
+                }, { merge: true });
+
+                await sendEmailVerification(createdUserObj);
+                showSuccess('Verification email has been successfully sent! Please check your inbox.');
+
+                localStorage.removeItem('temp_reg_user');
+                localStorage.removeItem('temp_reg_email');
+                localStorage.removeItem('temp_reg_pass');
+                localStorage.removeItem('temp_reg_code');
+
+                await signOut(auth);
+
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') {
+                    showSuccess('Account already created. Click "Resend Verification" if you need a new email.');
+                } else {
+                    showError('Error: ' + error.message);
+                }
+            }
+        });
+
         window.handleResend = async function() {
             document.getElementById('verifyErrorMsg').style.display = 'none';
             document.getElementById('verifySuccessMsg').style.display = 'none';
 
-            if (!currentUser) {
-                showError('Session expired or user not found. Please log in or register again.');
+            if (!createdUserObj) {
+                showError('Please log in through the login page to resend verification.');
                 return;
             }
 
             try {
-                if (currentUser.emailVerified) {
-                    showSuccess('Your email is already verified! You can proceed to login.');
-                    return;
-                }
-
-                await sendEmailVerification(currentUser);
-                showSuccess('Verification email has been resent successfully! Check your inbox.');
+                await sendEmailVerification(createdUserObj);
+                showSuccess('Verification email has been resent successfully!');
             } catch (error) {
-                showError('Error: '  + error.message);
+                showError('Error: ' + error.message);
             }
         }
     </script>
