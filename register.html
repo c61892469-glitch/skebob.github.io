@@ -73,12 +73,9 @@
                     </div>
                 </fieldset>
                 <fieldset class="f-fieldset">
-                    <legend class="f-legend">Enter a valid email address and verify it</legend>
+                    <legend class="f-legend">Enter a valid email address</legend>
                     <label class="f-label">Email</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="email" class="f-input" id="regEmail">
-                        <button type="button" class="f-btn" onclick="handleSendVerification()">Send Verification</button>
-                    </div>
+                    <input type="email" class="f-input" id="regEmail" style="max-width: 100%;">
                 </fieldset>
                 <fieldset class="f-fieldset">
                     <legend class="f-legend">You must be invited to join this forum</legend>
@@ -91,14 +88,13 @@
                 </fieldset>
             </div>
             <div style="padding: 8px 18px 12px 18px;">
-                <button class="f-btn" onclick="handleRegister()">Register</button>
+                <button class="f-btn" onclick="handleRegister()">Continue to Verification</button>
             </div>
         </div>
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
@@ -109,7 +105,6 @@
             appId: "1:853888273098:web:d46ec3bbb556693edd4233"
         };
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
         function showError(msg) {
@@ -121,37 +116,6 @@
             const el = document.getElementById('regSuccessMsg');
             el.textContent = msg;
             el.style.display = 'block';
-        }
-
-        window.handleSendVerification = async function() {
-            document.getElementById('regErrorMsg').style.display = 'none';
-            document.getElementById('regSuccessMsg').style.display = 'none';
-
-            const email = document.getElementById('regEmail').value.trim();
-            const pass = document.getElementById('regPass').value.trim();
-
-            if (!email || !pass) {
-                showError('Please enter Email and Password first to send verification!');
-                return;
-            }
-
-            try {
-                let user = auth.currentUser;
-                if (!user) {
-                    try {
-                        const cred = await signInWithEmailAndPassword(auth, email, pass);
-                        user = cred.user;
-                    } catch (e) {
-                        showError('Please enter the correct password or complete registration first.');
-                        return;
-                    }
-                }
-
-                await sendEmailVerification(user);
-                showSuccess('Verification email has been sent to ' + email + '!');
-            } catch (error) {
-                showError('Send error: ' + error.message);
-            }
         }
 
         window.handleRegister = async function() {
@@ -182,35 +146,22 @@
             }
 
             try {
+                // Проверяем инвайт-код заранее, чтобы не гонять зря пользователя
                 const inviteRef = doc(db, "invites", code);
                 const inviteSnap = await getDoc(inviteRef);
                 if (!inviteSnap.exists() || inviteSnap.data().used) { 
                     showError('Invalid or already redeemed invitation code!'); 
                     return; 
                 }
-                
-                // Создаем аккаунт
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                const userObj = userCredential.user;
 
-                // Сохраняем данные пользователя в базу
-                await updateDoc(inviteRef, { used: true });
-                await updateProfile(userObj, { displayName: user });
-                await setDoc(doc(db, "users", userObj.uid), { 
-                    username: user,
-                    email: email,
-                    hwid: "" 
-                }, { merge: true });
+                // Сохраняем данные во временное хранилище и переходим на верификацию
+                localStorage.setItem('temp_reg_user', user);
+                localStorage.setItem('temp_reg_email', email);
+                localStorage.setItem('temp_reg_pass', pass);
+                localStorage.setItem('temp_reg_code', code);
 
-                // Отправляем письмо для подтверждения
-                await sendEmailVerification(userObj);
-
-                // Сразу разлогиниваем, чтобы пользователь не смог зайти без подтверждения
-                await signOut(auth);
-                
-                // Выводим сообщение о том, что аккаунт создан, но требуется подтверждение почты
-                showSuccess('Registration successful! Please check your email and confirm your address before logging in.');
-                setTimeout(() => { location.href = 'login.html'; }, 3500);
+                showSuccess('Redirecting to email verification...');
+                setTimeout(() => { location.href = 'verify.html'; }, 1000);
             } catch (error) { 
                 showError(error.message); 
             }
