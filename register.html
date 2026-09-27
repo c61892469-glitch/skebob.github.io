@@ -95,6 +95,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
@@ -106,6 +107,7 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         function showError(msg) {
             const el = document.getElementById('regErrorMsg');
@@ -146,7 +148,7 @@
             }
 
             try {
-                // Проверяем инвайт-код заранее, чтобы не гонять зря пользователя
+                // 1. Проверяем инвайт-код
                 const inviteRef = doc(db, "invites", code);
                 const inviteSnap = await getDoc(inviteRef);
                 if (!inviteSnap.exists() || inviteSnap.data().used) { 
@@ -154,14 +156,19 @@
                     return; 
                 }
 
-                // Сохраняем данные во временное хранилище и переходим на верификацию
-                localStorage.setItem('temp_reg_user', user);
-                localStorage.setItem('temp_reg_email', email);
-                localStorage.setItem('temp_reg_pass', pass);
-                localStorage.setItem('temp_reg_code', code);
+                // 2. Создаем аккаунт в Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                await updateProfile(userCredential.user, { displayName: user });
 
-                showSuccess('Redirecting to email verification...');
-                setTimeout(() => { location.href = 'verify.html'; }, 1000);
+                // 3. Отправляем письмо с подтверждением
+                await sendEmailVerification(userCredential.user);
+
+                // Сохраняем данные для входа на случай, если понадобятся
+                localStorage.setItem('saved_email', email);
+                localStorage.setItem('saved_pass', pass);
+
+                showSuccess('Account created! Verification email sent. Redirecting...');
+                setTimeout(() => { location.href = 'verify.html'; }, 1500);
             } catch (error) { 
                 showError(error.message); 
             }
