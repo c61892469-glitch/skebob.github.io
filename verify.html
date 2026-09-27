@@ -53,7 +53,7 @@
                 <div class="info-box">
                     <strong>Account created successfully!</strong><br>
                     We have sent a verification link to <span id="userEmailDisplay" style="color: var(--accent-green);">your email</span>.<br>
-                    Please check your inbox, click the link, and then click the button below to log in.
+                    Please check your inbox, click the link, and then click the button below.
                 </div>
                 <div class="f-error-msg" id="verifyErrorMsg"></div>
                 <div class="f-success-msg" id="verifySuccessMsg"></div>
@@ -61,22 +61,22 @@
                 <div class="instructions-box">
                     <strong>Instructions:</strong>
                     <ul>
-                        <li>Open your email inbox and click the verification link.</li>
-                        <li>Check your <strong>Spam</strong> folder if you don't see the email.</li>
-                        <li>Once verified, click <strong>"I've Verified / Continue"</strong> below.</li>
+                        <li>Open your email and click the verification link.</li>
+                        <li>Check your <strong>Spam</strong> folder if it's missing.</li>
+                        <li>Once verified, click <strong>"I've Verified / Continue"</strong>.</li>
                     </ul>
                 </div>
             </div>
             <div style="padding: 8px 18px 12px 18px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="f-btn" onclick="checkVerificationAndLogin()">I've Verified / Continue</button>
-                <button class="f-btn" onclick="handleResend()">Resend Verification</button>
+                <button class="f-btn" onclick="checkVerificationStatus()">I've Verified / Continue</button>
+                <button class="f-btn" onclick="resendEmail()">Resend Verification</button>
             </div>
         </div>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, updateDoc, setDoc } from "https://www.gstatic.com/firestore.js"; // если нужен путевой импорт, поправим под ваш
+        import { getAuth, onAuthStateChanged, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
@@ -89,115 +89,73 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        let savedEmailForLogin = "";
-        let savedPassForLogin = "";
-
         function showError(msg) {
             const el = document.getElementById('verifyErrorMsg');
             el.textContent = msg;
             el.style.display = 'block';
+            document.getElementById('verifySuccessMsg').style.display = 'none';
         }
+
         function showSuccess(msg) {
             const el = document.getElementById('verifySuccessMsg');
             el.textContent = msg;
             el.style.display = 'block';
+            document.getElementById('verifyErrorMsg').style.display = 'none';
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            const username = localStorage.getItem('temp_reg_user');
-            const email = localStorage.getItem('temp_reg_email');
-            const pass = localStorage.getItem('temp_reg_pass');
-            const code = localStorage.getItem('temp_reg_code');
-
-            if (!email || !pass || !username) {
-                // Если данные уже стерлись, но пользователь тут, попробуем взять из текущей сессии если она есть
-                return;
-            }
-
-            savedEmailForLogin = email;
-            savedPassForLogin = pass;
-            document.getElementById('userEmailDisplay').textContent = email;
-
-            try {
-                // Создаем аккаунт при открытии страницы
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                await updateProfile(userCredential.user, { displayName: username });
-                
-                if (code) {
-                    // Можно подключить firestore если нужно жечь инвайт прямо здесь
-                }
-
-                await sendEmailVerification(userCredential.user);
-                showSuccess('Account created and verification email sent!');
-                
-                // Очищаем временные данные регистрации
-                localStorage.removeItem('temp_reg_user');
-                localStorage.removeItem('temp_reg_code');
-            } catch (error) {
-                if (error.code === 'auth/email-already-in-use') {
-                    showSuccess('Account already exists. Please verify your email and click continue.');
-                } else {
-                    // Если пользователь просто обновил страницу, данные для входа сохраним в localStorage
-                    localStorage.setItem('saved_email', email);
-                    localStorage.setItem('saved_pass', pass);
-                }
+        // Отслеживаем текущего залогиненного пользователя
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('userEmailDisplay').textContent = user.email;
+            } else {
+                // Если сессия слетела, отправляем на логин
+                showError('No active session found. Please log in.');
+                setTimeout(() => { location.href = 'login.html'; }, 2000);
             }
         });
 
-        // Главная кнопка проверки и входа
-        window.checkVerificationAndLogin = async function() {
-            document.getElementById('verifyErrorMsg').style.display = 'none';
-            document.getElementById('verifySuccessMsg').style.display = 'none';
-
-            const email = savedEmailForLogin || localStorage.getItem('saved_email');
-            const pass = savedPassForLogin || localStorage.getItem('saved_pass');
-
-            if (!email || !pass) {
-                showError('Session data lost. Please log in manually.');
-                setTimeout(() => { location.href = 'login.html'; }, 2000);
+        // Кнопка проверки статуса и входа
+        window.checkVerificationStatus = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                showError('User not found. Please log in again.');
                 return;
             }
 
             try {
-                // Пробуем войти в аккаунт
-                const userCred = await signInWithEmailAndPassword(auth, email, pass);
-                const user = userCred.user;
-
-                // Обновляем данные пользователя из сервера, чтобы узнать статус почты
+                // Принудительно обновляем данные пользователя с сервера Firebase
                 await user.reload();
-
+                
                 if (user.emailVerified) {
-                    showSuccess('Email verified successfully! Entering your account...');
-                    setTimeout(() => { 
-                        location.href = 'index.html'; // Или куда у вас перенаправляет после входа
+                    showSuccess('Email verified successfully! Entering forum...');
+                    setTimeout(() => {
+                        location.href = 'index.html';
                     }, 1000);
                 } else {
-                    showError('Your email is not verified yet. Please click the link in your email first.');
+                    showError('Email is not verified yet. Please check your inbox and click the link first.');
                 }
             } catch (error) {
-                showError('Error: ' + error.message);
+                showError('Error checking status: ' + error.message);
             }
         }
 
-        window.handleResend = async function() {
-            document.getElementById('verifyErrorMsg').style.display = 'none';
-            document.getElementById('verifySuccessMsg').style.display = 'none';
-
-            const email = savedEmailForLogin || localStorage.getItem('saved_email');
-            const pass = savedPassForLogin || localStorage.getItem('saved_pass');
-
-            if (!email || !pass) {
-                showError('Please go to login page.');
+        // Кнопка повторной отправки письма
+        window.resendEmail = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                showError('User not found. Please log in again.');
                 return;
             }
 
             try {
-                // Авторизуемся на секунду, чтобы отправить повторное письмо
-                const userCred = await signInWithEmailAndPassword(auth, email, pass);
-                await sendEmailVerification(userCred.user);
+                await sendEmailVerification(user);
                 showSuccess('Verification email has been resent successfully!');
             } catch (error) {
-                showError('Error: ' + error.message);
+                if (error.code === 'auth/too-many-requests') {
+                    showError('Too many requests. Please wait a bit before requesting another email.');
+                } else {
+                    showError('Failed to resend: ' + error.message);
+                }
             }
         }
     </script>
