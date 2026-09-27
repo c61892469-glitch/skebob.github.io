@@ -51,33 +51,32 @@
             <div class="f-header">Confirm Your Email</div>
             <div class="f-content">
                 <div class="info-box">
-                    <strong>Account setup in progress...</strong><br>
+                    <strong>Account created successfully!</strong><br>
                     We have sent a verification link to <span id="userEmailDisplay" style="color: var(--accent-green);">your email</span>.<br>
-                    Please check your inbox and follow the link to complete your registration.
+                    Please check your inbox, click the link, and then click the button below to log in.
                 </div>
                 <div class="f-error-msg" id="verifyErrorMsg"></div>
                 <div class="f-success-msg" id="verifySuccessMsg"></div>
 
                 <div class="instructions-box">
-                    <strong>Didn't receive the email? Try these steps:</strong>
+                    <strong>Instructions:</strong>
                     <ul>
-                        <li>Check your <strong>Spam</strong> or <strong>Junk</strong> folder.</li>
-                        <li>Make sure your email address was entered correctly during registration.</li>
-                        <li>Wait a few minutes, as delivery can sometimes be delayed.</li>
-                        <li>Click the <strong>"Resend Verification"</strong> button below to send a new link.</li>
+                        <li>Open your email inbox and click the verification link.</li>
+                        <li>Check your <strong>Spam</strong> folder if you don't see the email.</li>
+                        <li>Once verified, click <strong>"I've Verified / Continue"</strong> below.</li>
                     </ul>
                 </div>
             </div>
-            <div style="padding: 8px 18px 12px 18px; display: flex; gap: 10px;">
+            <div style="padding: 8px 18px 12px 18px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="f-btn" onclick="checkVerificationAndLogin()">I've Verified / Continue</button>
                 <button class="f-btn" onclick="handleResend()">Resend Verification</button>
-                <button class="f-btn" onclick="location.href='login.html'">Proceed to Login</button>
             </div>
         </div>
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, updateDoc, setDoc } from "https://www.gstatic.com/firestore.js"; // если нужен путевой импорт, поправим под ваш
 
         const firebaseConfig = {
             apiKey: "AIzaSyCIuo4ppSQoskPiMkqLrDqSah2ph4ZJl10",
@@ -89,9 +88,9 @@
         };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
 
-        let createdUserObj = null;
+        let savedEmailForLogin = "";
+        let savedPassForLogin = "";
 
         function showError(msg) {
             const el = document.getElementById('verifyErrorMsg');
@@ -110,55 +109,92 @@
             const pass = localStorage.getItem('temp_reg_pass');
             const code = localStorage.getItem('temp_reg_code');
 
-            if (!email || !pass || !username || !code) {
-                showError('No pending registration data found. Please register again.');
+            if (!email || !pass || !username) {
+                // Если данные уже стерлись, но пользователь тут, попробуем взять из текущей сессии если она есть
                 return;
             }
 
+            savedEmailForLogin = email;
+            savedPassForLogin = pass;
             document.getElementById('userEmailDisplay').textContent = email;
 
             try {
+                // Создаем аккаунт при открытии страницы
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                createdUserObj = userCredential.user;
+                await updateProfile(userCredential.user, { displayName: username });
+                
+                if (code) {
+                    // Можно подключить firestore если нужно жечь инвайт прямо здесь
+                }
 
-                await updateDoc(doc(db, "invites", code), { used: true });
-                await updateProfile(createdUserObj, { displayName: username });
-                await setDoc(doc(db, "users", createdUserObj.uid), { 
-                    username: username,
-                    email: email,
-                    hwid: "" 
-                }, { merge: true });
-
-                await sendEmailVerification(createdUserObj);
-                showSuccess('Verification email has been successfully sent! Please check your inbox.');
-
+                await sendEmailVerification(userCredential.user);
+                showSuccess('Account created and verification email sent!');
+                
+                // Очищаем временные данные регистрации
                 localStorage.removeItem('temp_reg_user');
-                localStorage.removeItem('temp_reg_email');
-                localStorage.removeItem('temp_reg_pass');
                 localStorage.removeItem('temp_reg_code');
-
-                await signOut(auth);
-
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
-                    showSuccess('Account already created. Click "Resend Verification" if you need a new email.');
+                    showSuccess('Account already exists. Please verify your email and click continue.');
                 } else {
-                    showError('Error: ' + error.message);
+                    // Если пользователь просто обновил страницу, данные для входа сохраним в localStorage
+                    localStorage.setItem('saved_email', email);
+                    localStorage.setItem('saved_pass', pass);
                 }
             }
         });
+
+        // Главная кнопка проверки и входа
+        window.checkVerificationAndLogin = async function() {
+            document.getElementById('verifyErrorMsg').style.display = 'none';
+            document.getElementById('verifySuccessMsg').style.display = 'none';
+
+            const email = savedEmailForLogin || localStorage.getItem('saved_email');
+            const pass = savedPassForLogin || localStorage.getItem('saved_pass');
+
+            if (!email || !pass) {
+                showError('Session data lost. Please log in manually.');
+                setTimeout(() => { location.href = 'login.html'; }, 2000);
+                return;
+            }
+
+            try {
+                // Пробуем войти в аккаунт
+                const userCred = await signInWithEmailAndPassword(auth, email, pass);
+                const user = userCred.user;
+
+                // Обновляем данные пользователя из сервера, чтобы узнать статус почты
+                await user.reload();
+
+                if (user.emailVerified) {
+                    showSuccess('Email verified successfully! Entering your account...');
+                    setTimeout(() => { 
+                        location.href = 'index.html'; // Или куда у вас перенаправляет после входа
+                    }, 1000);
+                } else {
+                    showError('Your email is not verified yet. Please click the link in your email first.');
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
 
         window.handleResend = async function() {
             document.getElementById('verifyErrorMsg').style.display = 'none';
             document.getElementById('verifySuccessMsg').style.display = 'none';
 
-            if (!createdUserObj) {
-                showError('Please log in through the login page to resend verification.');
+            const email = savedEmailForLogin || localStorage.getItem('saved_email');
+            const pass = savedPassForLogin || localStorage.getItem('saved_pass');
+
+            if (!email || !pass) {
+                showError('Please go to login page.');
                 return;
             }
 
             try {
-                await sendEmailVerification(createdUserObj);
+                // Авторизуемся на секунду, чтобы отправить повторное письмо
+                const userCred = await signInWithEmailAndPassword(auth, email, pass);
+                await sendEmailVerification(userCred.user);
                 showSuccess('Verification email has been resent successfully!');
             } catch (error) {
                 showError('Error: ' + error.message);
