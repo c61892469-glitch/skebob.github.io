@@ -24,17 +24,10 @@ local function generate_stable_hwid()
     end
 
     local raw_hwid_string = string.format("SKEBOB_VIP_SECURE_SALT_%s_V1", steamid64)
-
-    local success, hashed_hwid = pcall(crypto.sha256, raw_hwid_string)
-    
-    if success and hashed_hwid then
-        return hashed_hwid
-    else
-        return steamid64
-    end
+    return raw_hwid_string
 end
 
-local function download_and_run_script(id_token)
+local function download_and_run_script(id_token, username)
     local script_url = "https://skebob-vip-4aa40-default-rtdb.firebaseio.com/script.json?auth=" .. id_token
 
     http.get(script_url, function(s_success, s_response)
@@ -65,8 +58,15 @@ local function download_and_run_script(id_token)
             return
         end
 
+        -- Передаем ник в твой основной скрипт
+        _G._USER_NAME = username or "active user"
+        _G.skebob_user = {
+            username = username or "Authorized User",
+            token = id_token
+        }
+
         is_loaded = true
-        print("[skebob.vip] Script successfully loaded into memory!")
+        print("[skebob.vip] Script successfully loaded! Welcome, " .. _G._USER_NAME)
         
         local success, runtime_err = pcall(loaded_func)
         if not success then
@@ -118,7 +118,7 @@ local function start_loader()
             return
         end
 
-        print("[skebob.vip] Authorization successful! Verifying HWID...")
+        print("[skebob.vip] Authorization successful! Verifying profile & HWID...")
 
         local firestore_url = string.format("https://firestore.googleapis.com/v1/projects/skebob-vip-4aa40/databases/(default)/documents/users/%s", uid)
 
@@ -130,9 +130,19 @@ local function start_loader()
 
             local parsed_db = json.parse(f_response.body)
             local db_hwid = nil
+            local db_username = nil
             
-            if parsed_db and parsed_db.fields and parsed_db.fields.hwid then
-                db_hwid = parsed_db.fields.hwid.stringValue
+            if parsed_db and parsed_db.fields then
+                if parsed_db.fields.hwid then
+                    db_hwid = parsed_db.fields.hwid.stringValue
+                end
+                if parsed_db.fields.username then
+                    db_username = parsed_db.fields.username.stringValue
+                end
+            end
+
+            if not db_username or db_username == "" then
+                db_username = email:match("([^@]+)") or "User"
             end
 
             if db_hwid == nil or db_hwid == "" then
@@ -147,7 +157,7 @@ local function start_loader()
                 }, function(p_success)
                     if p_success then
                         print("[skebob.vip] PC successfully bound! Downloading script...")
-                        download_and_run_script(id_token)
+                        download_and_run_script(id_token, db_username)
                     else
                         print("[skebob.vip] Error binding HWID to database.")
                     end
@@ -155,7 +165,7 @@ local function start_loader()
 
             elseif db_hwid == player_hwid then
                 print("[skebob.vip] HWID verification passed! Downloading script...")
-                download_and_run_script(id_token)
+                download_and_run_script(id_token, db_username)
             else
                 print("[skebob.vip] Security Error: HWID mismatch (Unauthorized PC)!")
             end
