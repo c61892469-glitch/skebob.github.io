@@ -140,9 +140,10 @@ local text_cache = {}
 local function cached_measure(flags, text)
     local key = tostring(flags) .. "|" .. tostring(text)
     if not text_cache[key] then
-        text_cache[key] = renderer.measure_text(flags, text)
+        local w, h = renderer.measure_text(flags, text)
+        text_cache[key] = { w = w or 0, h = h or 0 }
     end
-    return text_cache[key]
+    return text_cache[key].w, text_cache[key].h
 end
 
 local utils = {}
@@ -557,7 +558,6 @@ ui.settings.r_separation = groups.aa.angles:label("\12<gray>\12<seperation>")
 ui.settings.resolver = groups.aa.angles:checkbox("\11\226\128\167\226\130\138\203\154 \226\152\129\239\184\143\226\139\133\226\153\161\240\147\130\131 \224\163\170 \214\180\214\182\214\184\226\152\190.\r  Resolver")
 ui.settings.predict = groups.aa.angles:checkbox("CVar manipulation")
 ui.settings.aimbot_helper = groups.aa.angles:checkbox("Aimbot helper")
-ui.settings.aimbot_helper:set_enabled(true)
 ui.settings.aimbot_helper_label = groups.aa.angles:label("Will \11prefer/force\r body aim and")
 ui.settings.aimbot_helper_label_2 = groups.aa.angles:label("safe points if needed automatically.")
 ui.settings.aimbot_helper_label:depend(ui.settings.aimbot_helper)
@@ -582,7 +582,6 @@ pui.traverse({ ui.settings.auto_exploit_states, ui.settings.auto_exploit_avoid }
 end)
 
 ui.settings.auto_teleport = groups.aa.angles:checkbox("Auto break lag compensation", 0)
-ui.settings.auto_teleport:set_enabled(true)
 ui.settings.auto_teleport_dist = groups.aa.angles:slider("\nAuto teleport threat distance", 100, 2000, 800)
 ui.settings.auto_teleport_fov = groups.aa.angles:slider("\nAuto teleport threat FOV", 10, 180, 60)
 
@@ -652,12 +651,9 @@ pui.traverse({ ui.settings.anim_in_moving, ui.settings.anim_in_air, ui.settings.
 end)
 
 ui.settings.edge_stop = groups.aa.angles:checkbox("Stop on edge", 0)
-ui.settings.edge_stop:set_enabled(true)
 ui.settings.console_filter = groups.aa.angles:checkbox("Console filter")
 ui.settings.optimization = groups.aa.angles:checkbox("Optimization")
-ui.settings.optimization:set_enabled(true)
 ui.settings.trash_talk = groups.aa.angles:checkbox("Trash talk")
-ui.settings.trash_talk:set_enabled(true)
 ui.settings.trash_talk_mode = groups.aa.angles:combobox("\nTrash talk mode", { "skebob.vip", "Kawaii" })
 ui.settings.trash_talk_type = groups.aa.angles:multiselect("\nTrash talk type", { "Kill", "Death", "Miss" })
 
@@ -770,7 +766,6 @@ pui.traverse({ ui.addons.defensive_peek_label, ui.addons.defensive_peek_label_2,
 end)
 
 ui.addons.shit_aa = groups.aa.other:multiselect("PAKETA AA on", { "Warm-up", "If enemies dead" })
-ui.addons.shit_aa:set_enabled(true)
 
 pui.traverse(ui.addons, function(item)
     item:depend({ ui.toggle, true }, { ui.tabs.main, "Anti-aimbot angles" })
@@ -1067,7 +1062,6 @@ do
     local BROKE_LC_DIST_SQ = 1024
     local LBY_UPDATE_TIME = 0.22
     local LBY_FLICK_MIN_DELTA = 10
-    local FAKE_LAG_MIN_DIFF = 12
 
     local function to_ticks(simtime)
         return math.floor((simtime or 0) * 64 + 0.5)
@@ -1163,6 +1157,31 @@ do
         return math.max(math.min(multiplier, 1), 0.5) * 60
     end
 
+    local function get_shot_side(ent)
+        local lp = entity.get_local_player()
+        if not lp then return 0 end
+        local lx, ly = entity.get_prop(lp, "m_vecOrigin")
+        local tx, ty = entity.get_prop(ent, "m_vecOrigin")
+        if not lx or not tx then return 0 end
+        local to_us = math.deg(math.atan2(ly - ty, lx - tx))
+        local eye_yaw = select(2, entity.get_prop(ent, "m_angEyeAngles"))
+        if not eye_yaw then return 0 end
+        local delta = utils.normalize_yaw(to_us - eye_yaw)
+        if delta > 0 and delta < 90 then return -1 end
+        if delta < 0 and delta > -90 then return 1 end
+        return 0
+    end
+
+    local function build_brute_angles(max_yaw)
+        local base = math.min(math.max(max_yaw or 60, 30), 60)
+        return {
+            base, -base,
+            base * 0.5, -base * 0.5,
+            base * 1.5, -base * 1.5,
+            180, -180, 0,
+        }
+    end
+
     local function create_player_data(ent)
         local data = {
             player = ent,
@@ -1208,7 +1227,9 @@ do
             end
 
             -- Fake lag detection: враг дёргает simtime
-            data.in_fake_lag = (diff >= FAKE_LAG_MIN_DIFF) or (data.ticks_left > 1 and data.ticks_left < data.max_tickbase)
+                        -- Правильный fake lag detection: simtime отстаёт на 2..16 тиков
+            data.in_fake_lag = (diff >= 2 and diff <= 16)
+            data.choking = (diff > 16)
 
             data.last_simtime = tick_sim
         end
@@ -1216,9 +1237,15 @@ do
     end
 
     local function set_resolve(ent, values)
-        if not ent then return end
-        plist.set(ent, "Force body yaw", values.force_body_yaw and 1 or 0)
-        plist.set(ent, "Force body yaw value", values.yaw_value or 0)
+        if not ent or type(ent) ~= "number" then return end
+        if not values or type(values) ~= "table" then return end
+        local ok, err = pcall(function()
+            plist.set(ent, "Force body yaw", values.force_body_yaw and 1 or 0)
+            plist.set(ent, "Force body yaw value", values.yaw_value or 0)
+        end)
+        if not ok then
+            -- бот или невалидный ent — просто пропускаем
+        end
     end
 
     local function track_delay(state, tick)
@@ -1326,16 +1353,8 @@ do
         local eye_yaw = select(2, entity.get_prop(ent, "m_angEyeAngles")) or 0
         if not eye_yaw then return end
 
-        local pose_yaw_raw = entity.get_prop(ent, "m_flPoseParameter", 11)
-        local pose_yaw = pose_yaw_raw and ((pose_yaw_raw * 360) - 180) or nil
-
-        -- LBY tracking
-        local lby = entity.get_prop(ent, "m_flLowerBodyYawTarget") or 0
-        local goal_feet = anim.goal_feet_yaw or eye_yaw
-        local lby_delta = math.abs(utils.normalize_yaw(lby - eye_yaw))
-        local goal_delta = math.abs(utils.normalize_yaw(goal_feet - eye_yaw))
-
         local tick_sim = to_ticks(simtime)
+        local lby = entity.get_prop(ent, "m_flLowerBodyYawTarget") or 0
 
         local state = resolver_states[ent]
         if not state then
@@ -1357,185 +1376,178 @@ do
                 cum_delta = 0,
                 last_lby = lby,
                 last_lby_update_time = 0,
+                last_lby_change_time = 0,
                 force_brute = nil,
                 brute_ticks = 0,
                 brute_flip = 1,
                 brute_base_side = nil,
                 miss_count = 0,
                 hit_count = 0,
+                real_yaw = 0,
+                real_yaw_known = false,
+                real_yaw_expire = 0,
+                last_cs_fc = 0,
+                last_cs_t = 0,
+                max_yaw_samples = {},
+                avg_max_yaw = 60,
             }
             resolver_states[ent] = state
             return
         end
 
+        -- ==== 1. Real side hint по направлению стрельбы ====
+        local shot_side = get_shot_side(ent)
+
+        -- ==== 2. Real yaw known через client-side anim update ====
+        local fc = anim.last_client_side_animation_update_framecount
+        local t  = anim.last_client_side_animation_update_time
+        if state.last_cs_fc ~= fc and (t or 0) > (state.last_cs_t or 0) then
+            state.real_yaw = eye_yaw
+            state.real_yaw_known = true
+            state.real_yaw_expire = globals.curtime() + 0.1
+        end
+        state.last_cs_fc = fc
+        state.last_cs_t  = t
+
+        local real_yaw_known = state.real_yaw_known and globals.curtime() < state.real_yaw_expire
+        if real_yaw_known then
+            local current_feet = anim.current_feet_yaw
+            if current_feet and math.abs(utils.normalize_yaw(current_feet)) < 180 then
+                local yaw_value = utils.normalize_yaw(current_feet)
+                set_resolve(ent, {force_body_yaw = true, yaw_value = yaw_value})
+                state.last_resolve_yaw = yaw_value
+                state.aa_state = "REAL"
+                state.last_yaw = eye_yaw
+                state.last_simtime = simtime
+                return
+            end
+        end
+
+        -- ==== 3. Same simtime -> держим последний resolve ====
         if simtime == state.last_simtime then
             state.no_update_ticks = (state.no_update_ticks or 0) + 1
-            local defensive = data.in_defensive or false
-            if not defensive then
+            if not data.in_defensive and state.last_resolve_yaw ~= 0 then
                 set_resolve(ent, {force_body_yaw = true, yaw_value = state.last_resolve_yaw})
-            else
-                set_resolve(ent, {force_body_yaw = false, yaw_value = 0})
             end
             return
         end
-
         state.no_update_ticks = 0
-        local yaw_delta = utils.normalize_yaw(eye_yaw - state.last_yaw)
-        local max_yaw = get_max_body_yaw(anim)
 
+        -- ==== 4. Обновляем max_yaw samples ====
+        local max_yaw_raw = get_max_body_yaw(anim)
+        table.insert(state.max_yaw_samples, max_yaw_raw)
+        if #state.max_yaw_samples > 16 then
+            table.remove(state.max_yaw_samples, 1)
+        end
+        local sum = 0
+        for _, v in ipairs(state.max_yaw_samples) do sum = sum + v end
+        state.avg_max_yaw = sum / #state.max_yaw_samples
+
+        -- ==== 5. Angle history ====
+        local yaw_delta = utils.normalize_yaw(eye_yaw - state.last_yaw)
         table.insert(state.angle_history, eye_yaw)
-        if #state.angle_history > 16 then
+        if #state.angle_history > 32 then
             table.remove(state.angle_history, 1)
         end
 
-        -- LBY update detection
+        -- ==== 6. LBY detection (правильный timing) ====
         local curtime = globals.curtime()
         local lby_changed = (lby ~= state.last_lby)
-        local time_since_update = curtime - (state.last_lby_update_time or 0)
-        local lby_flick_confirmed = lby_changed and lby_delta > LBY_FLICK_MIN_DELTA and time_since_update > LBY_UPDATE_TIME
-
+        local lby_should_update = false
+        if anim.run_amount and anim.run_amount < 0.1 and anim.on_ground then
+            if (curtime - (state.last_lby_change_time or 0)) > 1.1 then
+                lby_should_update = true
+            end
+        end
         if lby_changed then
-            state.last_lby_update_time = curtime
+            state.last_lby_change_time = curtime
+        end
+
+        if lby_changed and lby_should_update then
+            local yaw_value = utils.normalize_yaw(lby)
+            set_resolve(ent, {force_body_yaw = true, yaw_value = yaw_value})
+            state.last_resolve_yaw = yaw_value
+            state.aa_state = "LBY"
+            state.last_lby = lby
+            state.last_yaw = eye_yaw
+            state.last_simtime = simtime
+            return
         end
         state.last_lby = lby
 
-        -- Bruteforce: если попали в brute-режим, используем сохранённый угол
+        -- ==== 7. Bruteforce (если мы в нём) ====
         if state.force_brute then
             state.brute_ticks = (state.brute_ticks or 0) + 1
             if state.brute_ticks > 8 then
                 state.force_brute = nil
                 state.brute_ticks = 0
-                state.brute_base_side = nil
-                state.brute_flip = 1
             else
-                state.resolve_yaw = state.force_brute
-                state.last_resolve_yaw = state.resolve_yaw
-                local defensive = data.in_defensive or false
-                if not defensive then
-                    set_resolve(ent, {force_body_yaw = true, yaw_value = state.resolve_yaw})
+                if not data.in_defensive then
+                    set_resolve(ent, {force_body_yaw = true, yaw_value = state.force_brute})
                 end
-                state.last_yaw = eye_yaw
-                state.last_simtime = simtime
-                return
-            end
-        end
-
-        -- Приоритет 1: LBY updated → real angle точно известен
-        if lby_flick_confirmed then
-            state.resolve_yaw = utils.normalize_yaw(lby)
-            state.last_resolve_yaw = state.resolve_yaw
-            local defensive = data.in_defensive or false
-            if not defensive then
-                set_resolve(ent, {force_body_yaw = true, yaw_value = state.resolve_yaw})
-            end
-            state.last_yaw = eye_yaw
-            state.last_simtime = simtime
-            state.aa_state = "LBY"
-            return
-        end
-
-        -- Если враг в fakelag — pose parameter может быть мусором, не форсим
-        if not data.in_fake_lag and pose_yaw then
-            -- Приоритет 1.5: pose parameter даёт точный desync
-            local pose_delta = math.abs(utils.normalize_yaw(pose_yaw - eye_yaw))
-            if pose_delta > 15 and pose_delta < 60 then
-                state.resolve_yaw = utils.normalize_yaw(pose_yaw)
-                state.last_resolve_yaw = state.resolve_yaw
-                local defensive = data.in_defensive or false
-                if not defensive then
-                    set_resolve(ent, {force_body_yaw = true, yaw_value = state.resolve_yaw})
-                end
-                state.last_yaw = eye_yaw
-                state.last_simtime = simtime
-                state.aa_state = "P"
-                return
-            end
-        end
-
-        -- Приоритет 2: goal_feet_yaw сильно расходится с eye_yaw → desync known
-        if not data.in_fake_lag and goal_delta > 20 and goal_delta < 60 then
-            state.resolve_yaw = utils.normalize_yaw(goal_feet)
-            state.last_resolve_yaw = state.resolve_yaw
-            local defensive = data.in_defensive or false
-            if not defensive then
-                set_resolve(ent, {force_body_yaw = true, yaw_value = state.resolve_yaw})
-            end
-            state.last_yaw = eye_yaw
-            state.last_simtime = simtime
-            state.aa_state = "G"
-            return
-        end
-
-        -- Если враг в fakelag — не форсим резолв, ждём
-        if data.in_fake_lag then
-            state.aa_state = "FL"
-            state.last_yaw = eye_yaw
-            state.last_simtime = simtime
-            return
-        end
-
-        -- Приоритет 3: обычная jitter/static логика
-        state.aa_state = get_aa_state(state, yaw_delta, max_yaw, tick_sim)
-
-        if (state.aa_state == "DJ") and state.cached_delay then
-            local old_angle = get_history_angle(state, state.cached_delay)
-            if old_angle then
-                local delta = utils.normalize_yaw(eye_yaw - old_angle)
-                if math.abs(delta) > 30 then
-                    state.side = (delta > 0) and 1 or -1
-                end
-                local abs_delta = math.abs(delta)
-                local scale = math.max(math.min(abs_delta / max_yaw, 1), 0.15)
-                state.resolve_yaw = state.side * max_yaw * scale
-            else
-                if math.abs(yaw_delta) > 30 then
-                    local cum = (state.cum_delta or 0) * 0.8 + yaw_delta * 0.2
-                    state.cum_delta = cum
-                    state.side = (cum > 0) and 1 or -1
-                end
-                local abs_delta = math.abs(yaw_delta)
-                local scale = math.max(math.min(abs_delta / max_yaw, 1), 0.15)
-                state.resolve_yaw = state.side * max_yaw * scale
-            end
-        else
-            if math.abs(yaw_delta) > 30 then
-                state.side = (yaw_delta > 0) and 1 or -1
-            end
-            local abs_delta = math.abs(yaw_delta)
-            local scale = math.max(math.min(abs_delta / max_yaw, 1), 0.15)
-            state.resolve_yaw = state.side * max_yaw * scale
-        end
-
-        state.last_resolve_yaw = state.resolve_yaw
-        local defensive = data.in_defensive or false
-
-        -- Форсим ТОЛЬКО когда есть признаки AA
-        local has_aa = (state.aa_state ~= "S") or data.broke_lc or (math.abs(yaw_delta) > 15)
-        
-        -- Confidence система: если miss_count растёт — снижаем уверенность
-        if has_aa and not defensive then
-            if state.miss_count >= 1 and state.force_brute == nil then
-                state.force_brute = (state.brute_base_side or state.side) * 60 * (state.brute_flip or 1)
-                state.brute_ticks = 0
-                set_resolve(ent, {force_body_yaw = true, yaw_value = state.force_brute})
                 state.last_resolve_yaw = state.force_brute
-            else
-                if state.last_resolve_yaw ~= state.resolve_yaw then
-                    set_resolve(ent, {force_body_yaw = true, yaw_value = state.resolve_yaw})
-                    state.last_resolve_yaw = state.resolve_yaw
-                end
-            end
-        else
-            state.force_brute = nil
-            state.brute_ticks = 0
-            state.brute_base_side = nil
-            state.brute_flip = 1
-            if state.last_resolve_yaw ~= 0 then
-                set_resolve(ent, {force_body_yaw = false, yaw_value = 0})
-                state.last_resolve_yaw = 0
+                state.last_yaw = eye_yaw
+                state.last_simtime = simtime
+                return
             end
         end
 
+        -- ==== 8. Defensive -> копим, не форсим ====
+        if data.in_defensive then
+            state.aa_state = "DEF"
+            state.last_yaw = eye_yaw
+            state.last_simtime = simtime
+            return
+        end
+
+        -- ==== 9. Анализ jitter/static ====
+        local abs_delta = math.abs(yaw_delta)
+        if abs_delta > 30 then
+            state.jitter_ticks = state.jitter_ticks + 1
+            state.static_ticks = 0
+        elseif abs_delta < 3 then
+            state.static_ticks = state.static_ticks + 1
+            state.jitter_ticks = math.max(state.jitter_ticks - 1, 0)
+        else
+            state.jitter_ticks = math.max(state.jitter_ticks - 1, 0)
+            state.static_ticks = 0
+        end
+
+        if state.jitter_ticks >= 3 then
+            state.aa_state = "J"
+        elseif state.static_ticks >= 3 then
+            state.aa_state = "S"
+        end
+
+        -- ==== 10. Определяем target_side ====
+        local target_side = state.side
+        if shot_side ~= 0 then
+            target_side = shot_side
+            state.side = shot_side
+        elseif abs_delta > 30 then
+            target_side = (yaw_delta > 0) and 1 or -1
+            state.side = target_side
+        end
+
+        -- ==== 11. Если есть miss history -> сразу bruteforce ====
+        if state.miss_count >= 1 then
+            local angles = build_brute_angles(state.avg_max_yaw)
+            state.brute_index = ((state.brute_index or 0) % #angles) + 1
+            local yaw_value = angles[state.brute_index]
+            state.force_brute = yaw_value
+            state.brute_ticks = 0
+            set_resolve(ent, {force_body_yaw = true, yaw_value = yaw_value})
+            state.last_resolve_yaw = yaw_value
+            state.last_yaw = eye_yaw
+            state.last_simtime = simtime
+            return
+        end
+
+        -- ==== 12. Обычный resolve ====
+        local scale = math.max(math.min(abs_delta / math.max(state.avg_max_yaw, 1), 1), 0.3)
+        local yaw_value = target_side * state.avg_max_yaw * scale
+        set_resolve(ent, {force_body_yaw = true, yaw_value = yaw_value})
+        state.last_resolve_yaw = yaw_value
         state.last_yaw = eye_yaw
         state.last_simtime = simtime
     end
@@ -1620,9 +1632,11 @@ do
         state.brute_flip = 1
         state.brute_base_side = nil
         state.brute_index = nil
+        -- Держим сторону, которая дала hit
+        if state.last_resolve_yaw and state.last_resolve_yaw ~= 0 then
+            state.side = (state.last_resolve_yaw > 0) and 1 or -1
+        end
     end
-
-    local BRUTE_ANGLES = {58, -58, 29, -29, 90, -90, 180, 0}
 
     function features.resolver.on_miss(ent)
         if not ent then return end
@@ -1630,8 +1644,9 @@ do
         if not state then return end
         state.miss_count = (state.miss_count or 0) + 1
         state.hit_count = 0
-        state.brute_index = ((state.brute_index or 0) % #BRUTE_ANGLES) + 1
-        state.force_brute = BRUTE_ANGLES[state.brute_index]
+        local angles = build_brute_angles(state.avg_max_yaw)
+        state.brute_index = ((state.brute_index or 0) % #angles) + 1
+        state.force_brute = angles[state.brute_index]
         state.brute_ticks = 0
     end
 
@@ -1676,24 +1691,44 @@ do
 end
 
 features.aimbot_helper = {}
+
+local function safe_force_body(v)
+    local ref = refs.rage.aimbot.force_body
+    if ref and type(ref) == "table" and ref.override then
+        pcall(function()
+            if v ~= nil then ref:override(v) else ref:override() end
+        end)
+    end
+end
+
+local function safe_force_safe(v)
+    local ref = refs.rage.aimbot.force_safe
+    if ref and type(ref) == "table" and ref.override then
+        pcall(function()
+            if v ~= nil then ref:override(v) else ref:override() end
+        end)
+    end
+end
+
 function features.aimbot_helper.run(cmd)
-    if not ui.settings.aimbot_helper:get() then
-        refs.rage.aimbot.force_body:override()
-        refs.rage.aimbot.force_safe:override()
-        return
+    local enabled = false
+    do
+        local ok, val = pcall(function() return ui.settings.aimbot_helper:get() end)
+        if ok then enabled = (val == true) end
     end
 
     local lp = globals_state.local_player
-    if not lp or not entity.is_alive(lp) then
-        refs.rage.aimbot.force_body:override()
-        refs.rage.aimbot.force_safe:override()
-        return
-    end
-
     local target = client.current_threat and client.current_threat()
-    if not target or not entity.is_alive(target) then
-        refs.rage.aimbot.force_body:override()
-        refs.rage.aimbot.force_safe:override()
+
+    -- Проверка: можно ли вообще работать
+    if not enabled
+        or not lp
+        or not entity.is_alive(lp)
+        or not target
+        or not entity.is_alive(target)
+    then
+        safe_force_body()
+        safe_force_safe()
         return
     end
 
@@ -1704,16 +1739,16 @@ function features.aimbot_helper.run(cmd)
 
     -- Если у врага мало HP — force safe point
     if hp <= 30 then
-        refs.rage.aimbot.force_safe:override(true)
+        safe_force_safe(true)
     else
-        refs.rage.aimbot.force_safe:override()
+        safe_force_safe()
     end
 
     -- Если враг быстро движется — force body aim
     if speed > 100 then
-        refs.rage.aimbot.force_body:override(true)
+        safe_force_body(true)
     else
-        refs.rage.aimbot.force_body:override()
+        safe_force_body()
     end
 end
 
@@ -1818,9 +1853,16 @@ features.ideal_tick = {}
 do
     local last_enabled = false
 
-    function features.ideal_tick.run(cmd)
-        local enabled = ui.settings.ideal_tick:get() and ui.settings.ideal_tick.hotkey:get()
-        local settings = ui.settings.ideal_tick_settings:get() or {}
+function features.ideal_tick.run(cmd)
+    local enabled = false
+    do
+        local ok1, base = pcall(function() return ui.settings.ideal_tick:get() end)
+        if ok1 and base then
+            local ok2, hk = pcall(function() return ui.settings.ideal_tick.hotkey:get() end)
+            if ok2 then enabled = (hk == true) end
+        end
+    end
+    local settings = ui.settings.ideal_tick_settings:get() or {}
 
         if not enabled then
             if last_enabled then
@@ -2208,17 +2250,51 @@ end)
 client.set_event_callback("round_start", at_reset_state)
 
 features.peek_bot = {}
-local peek_state = { peeking = false, start_pos = nil, timer = 0 }
+local peek_state = {
+    peeking = false,
+    start_pos = nil,
+    timer = 0,
+    was_enabled = false,
+}
 
 function features.peek_bot.run(cmd)
-    if not ui.settings.peek_bot:get() then
+    -- 1. Peek bot работает ТОЛЬКО по hotkey
+    local enabled = false
+    do
+        local ok, base = pcall(function() return ui.settings.peek_bot:get() end)
+        if ok and base then
+            local ok2, hk = pcall(function() return ui.settings.peek_bot.hotkey:get() end)
+            if ok2 then enabled = (hk == true) end
+        end
+    end
+
+    -- 2. Если hotkey отпущен — сбрасываем и НЕ трогаем движение
+    if not enabled then
+        if peek_state.was_enabled then
+            peek_state.peeking = false
+            peek_state.start_pos = nil
+            peek_state.timer = 0
+            peek_state.was_enabled = false
+        end
+        return
+    end
+    peek_state.was_enabled = true
+
+    -- 3. Проверки на валидность
+    local lp = globals_state.local_player
+    if not lp or not entity.is_alive(lp) then
         peek_state.peeking = false
-        peek_state.start_pos = nil
         return
     end
 
-    local lp = globals_state.local_player
-    if not lp or not entity.is_alive(lp) then
+    -- Не пикать на кровати/лестнице/в прыжке
+    if not globals_state.on_ground then
+        peek_state.peeking = false
+        return
+    end
+
+    local movetype = entity.get_prop(lp, "m_MoveType") or 0
+    if movetype == 9 or movetype == 8 then -- ladder
         peek_state.peeking = false
         return
     end
@@ -2229,9 +2305,19 @@ function features.peek_bot.run(cmd)
         return
     end
 
-    local cx, cy, cz = entity.get_prop(lp, "m_vecOrigin")
-    if not cx then return end
-    local my_pos = vector(cx, cy, cz)
+    -- 4. Не пикать если враг дальше 800 юнитов
+    local mx, my, mz = entity.get_prop(lp, "m_vecOrigin")
+    if not mx then return end
+    local tx, ty, tz = entity.get_prop(target, "m_vecOrigin")
+    if tx then
+        local dx, dy = mx - tx, my - ty
+        if math.sqrt(dx * dx + dy * dy) > 800 then
+            peek_state.peeking = false
+            return
+        end
+    end
+
+    local my_pos = vector(mx, my, mz)
 
     if not peek_state.peeking then
         peek_state.start_pos = my_pos
@@ -2241,10 +2327,12 @@ function features.peek_bot.run(cmd)
 
     peek_state.timer = peek_state.timer + 1
 
-    -- Пикаем 0.5 секунды вперёд, потом назад
-    if peek_state.timer < 32 then
-        cmd.forwardmove = 450
+    -- 5. Плавный разгон от 200 до 450 за 5 тиков
+    if peek_state.timer < 25 then
+        local ramp = math.min(peek_state.timer / 5, 1)
+        cmd.forwardmove = 200 + (250 * ramp)
     else
+        -- Возврат к стартовой точке
         local dx = peek_state.start_pos.x - my_pos.x
         local dy = peek_state.start_pos.y - my_pos.y
         local dist = math.sqrt(dx * dx + dy * dy)
@@ -2254,7 +2342,10 @@ function features.peek_bot.run(cmd)
             cmd.forwardmove = math.cos(math.rad(yaw_diff)) * 450
             cmd.sidemove = -math.sin(math.rad(yaw_diff)) * 450
         else
+            -- Дошли до старта — стоп
             peek_state.peeking = false
+            cmd.forwardmove = 0
+            cmd.sidemove = 0
         end
     end
 end
@@ -3305,6 +3396,17 @@ function builder.get_peek_side()
     return "none"
 end
 
+builder._was_peeking_before = false
+builder._was_peeking_after = false
+builder._peek_end_tick = nil
+
+function builder.is_last_tick_before_peek()
+    local is_peeking = builder.get_peek_side() ~= "none"
+    local was_peeking = builder._was_peeking_before or false
+    builder._was_peeking_before = is_peeking
+    return (not was_peeking) and is_peeking
+end
+
 function builder.is_last_tick_after_peek()
     local current_tick = globals.tickcount()
     local was_peeking = builder._was_peeking_after or false
@@ -3408,19 +3510,20 @@ local function inverter_get(state_name, config, cmd)
     if not inverter_states[state_name] then
         init_inverter_state(state_name, config)
     end
-if config then
-    local changed = false
-    for k, v in pairs(config) do
-        if state[k] ~= v then changed = true; break end
+    local state = inverter_states[state_name]
+    if config then
+        local changed = false
+        for k, v in pairs(config) do
+            if state[k] ~= v then changed = true; break end
+        end
+        if changed then
+            for k, v in pairs(config) do state[k] = v end
+            state.current_side = 1
+            state.last_switch_tick = 0
+            state.is_frozen = false
+            state.ways_index = 1
+        end
     end
-    if changed then
-        for k, v in pairs(config) do state[k] = v end
-        state.current_side = 1
-        state.last_switch_tick = 0
-        state.is_frozen = false
-        state.ways_index = 1
-    end
-end
 
     if cmd and cmd.chokedcommands ~= 0 then
         return state.current_side
@@ -3488,6 +3591,9 @@ function builder.setup(cmd)
     }
 
     local lp = globals_state.local_player
+    if not lp or lp == 0 then
+        return angles
+    end
     local px, py, pz = entity.get_prop(lp, "m_vecOrigin")
     local height_diff = 0
     local target = client.current_threat and client.current_threat()
@@ -3629,8 +3735,12 @@ function builder.push(angles)
     refs.aa.angles.yaw[2]:override(utils.clamp(angles.yaw_offset or 0, -180, 180))
     refs.aa.angles.yaw_jitter[1]:override(angles.yaw_jitter or "Off")
     refs.aa.angles.yaw_jitter[2]:override(angles.jitter_offset or 0)
-    refs.aa.angles.body_yaw[1]:override(angles.body_yaw or "Off")
-    refs.aa.angles.body_yaw[2]:override(angles.body_yaw_angle or 0)
+    local body_yaw_mode = angles.body_yaw
+    if body_yaw_mode == false or body_yaw_mode == nil then body_yaw_mode = "Off" end
+    local body_yaw_angle = angles.body_yaw_angle
+    if body_yaw_angle == false or body_yaw_angle == nil then body_yaw_angle = 0 end
+    refs.aa.angles.body_yaw[1]:override(body_yaw_mode)
+    refs.aa.angles.body_yaw[2]:override(body_yaw_angle)
     refs.aa.angles.fs_body_yaw:override(angles.fs_body_yaw or false)
 end
 
@@ -3638,53 +3748,77 @@ features.aa.builder = builder
 
 features.aa.manual = {}
 features.aa.manual.current_side = MANUAL_NONE
-features.aa.manual._pressed_states = {}
+
+-- helper: у hotkey-элемента .get() возвращает активен ли бинд
+local function hotkey_active(item)
+    if not item then return false end
+    local ok, state = pcall(function() return item:get() end)
+    return ok and state == true
+end
 
 function features.aa.manual.update_hotkeys()
-    local sides = { left = MANUAL_LEFT, right = MANUAL_RIGHT, forward = MANUAL_FORWARD }
-    for name, side_val in pairs(sides) do
-        local pressed = ui.hotkeys[name]:get()
-        local was_pressed = features.aa.manual._pressed_states[name] or false
-        if pressed and (not was_pressed) then
-            if features.aa.manual.current_side == side_val then
-                features.aa.manual.current_side = MANUAL_NONE
-            else
-                features.aa.manual.current_side = side_val
-            end
-        end
-        features.aa.manual._pressed_states[name] = pressed
-    end
-    local reset_pressed = ui.hotkeys.reset:get()
-    local was_reset = features.aa.manual._pressed_states.reset or false
-    if reset_pressed and (not was_reset) then
+    local left_on    = hotkey_active(ui.hotkeys.left)
+    local right_on   = hotkey_active(ui.hotkeys.right)
+    local forward_on = hotkey_active(ui.hotkeys.forward)
+    local reset_on   = hotkey_active(ui.hotkeys.reset)
+
+    -- приоритет: reset > forward > right > left
+    if reset_on then
         features.aa.manual.current_side = MANUAL_NONE
+        return
     end
-    features.aa.manual._pressed_states.reset = reset_pressed
+
+    if forward_on then
+        features.aa.manual.current_side = MANUAL_FORWARD
+        return
+    end
+
+    if right_on then
+        features.aa.manual.current_side = MANUAL_RIGHT
+        return
+    end
+
+    if left_on then
+        features.aa.manual.current_side = MANUAL_LEFT
+        return
+    end
+
+    -- ничего не нажато — сбрасываем
+    features.aa.manual.current_side = MANUAL_NONE
 end
 
 function features.aa.manual.run(cmd, angles)
+    if not cmd then return false end
     features.aa.manual.update_hotkeys()
 
-    local edge_yaw = ui.hotkeys.edge_yaw:get()
-    local freestanding = ui.hotkeys.freestanding:get()
-    local legit_aa = ui.addons.legit_aa:get() and (cmd.in_use == 1)
+    local edge_yaw     = hotkey_active(ui.hotkeys.edge_yaw)
+    local freestanding = hotkey_active(ui.hotkeys.freestanding)
+    local legit_aa     = ui.addons.legit_aa:get() and (cmd.in_use == 1)
 
     refs.aa.angles.edge_yaw:override(edge_yaw)
-    refs.aa.angles.freestanding[1]:override(freestanding and (features.aa.manual.current_side == MANUAL_NONE)
-        and (not ui.hotkeys.disablers:get(globals_state.state)) and (not legit_aa))
+    refs.aa.angles.freestanding[1]:override(
+        freestanding
+        and (features.aa.manual.current_side == MANUAL_NONE)
+        and (not legit_aa)
+    )
 
     if features.aa.manual.current_side == MANUAL_NONE then
         return false
     end
 
-    angles.yaw_base = "Local view"
-    angles.yaw = "180"
+    angles.yaw_base   = "Local view"
+    angles.yaw        = "180"
     angles.yaw_offset = manual_offsets[features.aa.manual.current_side] or 0
 
-    if ui.hotkeys.static:get() then
-        angles.yaw_jitter = "Off"
-        angles.jitter_offset = 0
-        angles.body_yaw = "Off"
+    local static_enabled = false
+    do
+        local ok, val = pcall(function() return ui.hotkeys.static:get() end)
+        if ok then static_enabled = (val == true) end
+    end
+    if static_enabled then
+        angles.yaw_jitter     = "Off"
+        angles.jitter_offset  = 0
+        angles.body_yaw       = "Off"
         angles.body_yaw_angle = 0
     end
 
@@ -4428,7 +4562,7 @@ client.set_event_callback("setup_command", function(cmd)
         update_local_state(cmd)
         globals_state.tickcount = globals.tickcount()
         globals_state.choked = cmd.chokedcommands or 0
-        -- Update exploit progress bar
+ 
         do
             local dt_on = refs.rage.aimbot.double_tap[1]:get() and refs.rage.aimbot.double_tap[1].hotkey:get()
             local osaa_on = refs.aa.other.on_shot_anti_aim[1]:get() and refs.aa.other.on_shot_anti_aim[1].hotkey:get()
